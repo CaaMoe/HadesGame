@@ -8,8 +8,8 @@ sealed class AbstractGameEvent {
     abstract val eventName: String
 
     // 游戏事件触发时执行
-    abstract fun callEvent()
+    abstract suspend fun callEvent()
 
     // 当局游戏结束时执行
-    open fun endEvent() {}
+    open suspend fun endEvent() {}
 }
