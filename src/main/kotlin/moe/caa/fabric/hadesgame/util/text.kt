@@ -9,3 +9,9 @@ fun Text.broadcast() {
         player.sendMessage(this, false)
     }
 }
+
+fun Text.broadcastOverlay() {
+    for (player in getPlayers()) {
+        player.sendMessage(this, true)
+    }
+}

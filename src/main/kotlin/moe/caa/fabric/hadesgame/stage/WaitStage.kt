@@ -1,7 +1,7 @@
 package moe.caa.fabric.hadesgame.stage
 
 import moe.caa.fabric.hadesgame.GameCore
-import moe.caa.fabric.hadesgame.util.broadcast
+import moe.caa.fabric.hadesgame.util.broadcastOverlay
 import moe.caa.fabric.hadesgame.util.resetState
 import moe.caa.fabric.hadesgame.util.teleport
 import net.minecraft.text.Text
@@ -15,13 +15,13 @@ object WaitStage : AbstractStage() {
     private var tick = 0
 
     val tipStart: Text = Text.empty()
-        .append(Text.literal("执行 ").withColor(Color.GRAY.rgb))
+        .append(Text.literal("执行 ").withColor(Color.LIGHT_GRAY.rgb))
         .append(Text.literal("/game start").withColor(Color.WHITE.rgb))
-        .append(Text.literal(" 指令可开启一局新游戏.").withColor(Color.GRAY.rgb))
+        .append(Text.literal(" 指令可开启一局新游戏.").withColor(Color.LIGHT_GRAY.rgb))
     val tipAutoStart: Text = Text.empty()
-        .append(Text.literal("执行 ").withColor(Color.GRAY.rgb))
+        .append(Text.literal("执行 ").withColor(Color.LIGHT_GRAY.rgb))
         .append(Text.literal("/game autoStart").withColor(Color.WHITE.rgb))
-        .append(Text.literal(" 指令可设置足人时自动开始游戏.").withColor(Color.GRAY.rgb))
+        .append(Text.literal(" 指令可设置足人时自动开始游戏.").withColor(Color.LIGHT_GRAY.rgb))
 
     override suspend fun startStage() {
         tick = 0
@@ -34,11 +34,13 @@ object WaitStage : AbstractStage() {
     }
 
     override suspend fun tickStage() {
-        if (tick++ % 20 == 0) {
+        tick++
+
+        if (tick % 20 == 0) {
             if ((tick / 100 % 2) == 0) {
-                tipStart.broadcast()
+                tipStart.broadcastOverlay()
             } else {
-                tipAutoStart.broadcast()
+                tipAutoStart.broadcastOverlay()
             }
         }
     }

@@ -81,6 +81,9 @@ object GameCore {
     }
 
     fun stop() {
-        coroutineScope.cancel()
+        if (::coroutineScope.isInitialized) {
+            coroutineScope.cancel()
+        }
+
     }
 }

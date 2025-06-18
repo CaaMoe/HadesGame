@@ -1,15 +1,12 @@
 package moe.caa.fabric.hadesgame.stage
 
-import kotlinx.coroutines.delay
 import moe.caa.fabric.hadesgame.GameCore
 import moe.caa.fabric.hadesgame.util.Location
 import net.minecraft.block.BlockState
 import net.minecraft.block.Blocks
 import net.minecraft.block.FluidBlock
-import net.minecraft.text.Text
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.Heightmap
-import java.awt.Color
 
 // 地图初始化阶段
 object InitStage : AbstractOnlyTickOnceStage() {
@@ -17,32 +14,34 @@ object InitStage : AbstractOnlyTickOnceStage() {
     override val stageName = "地图初始化"
     fun lobbySpawnLocation() = spawnLoc.value
 
+
     override suspend fun tickStage() {
-        while (true) {
-            GameCore.server.playerManager.playerList.forEach { player ->
-                player.sendMessage(
-                    Text.literal("正在随机游戏地图, 请稍后...").withColor(Color.YELLOW.rgb), true
-                )
-            }
-
-            val lobbyLocation = randomSpawnLocation()
-            if (lobbyLocation == null) {
-                delay(1000)
-                continue
-            }
-
-            spawnLoc = lazy { lobbyLocation }
-
-            GameCore.logger.info("随机到下一把游戏位置: x = ${lobbyLocation.x}, z = ${lobbyLocation.z}")
-            break
-        }
-
-        GameCore.server.playerManager.playerList.forEach { player ->
-            player.sendMessage(
-                Text.literal("随机成功").withColor(Color.GREEN.rgb), true
-            )
-        }
-        placeLobbyBlock(Blocks.BARRIER.defaultState)
+//
+//        while (true) {
+//            GameCore.server.playerManager.playerList.forEach { player ->
+//                player.sendMessage(
+//                    Text.literal("正在随机游戏地图, 请稍后...").withColor(Color.YELLOW.rgb), true
+//                )
+//            }
+//
+//            val lobbyLocation = randomSpawnLocation()
+//            if (lobbyLocation == null) {
+//                delay(1000)
+//                continue
+//            }
+//
+//            spawnLoc = lazy { lobbyLocation }
+//
+//            GameCore.logger.info("随机到下一把游戏位置: x = ${lobbyLocation.x}, z = ${lobbyLocation.z}")
+//            break
+//        }
+//
+//        GameCore.server.playerManager.playerList.forEach { player ->
+//            player.sendMessage(
+//                Text.literal("随机成功").withColor(Color.GREEN.rgb), true
+//            )
+//        }
+//        placeLobbyBlock(Blocks.BARRIER.defaultState)
     }
 
     private fun randomSpawnLocation(): Location? {

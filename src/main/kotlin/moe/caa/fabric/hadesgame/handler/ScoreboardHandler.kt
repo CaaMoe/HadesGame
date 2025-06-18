@@ -1,13 +1,7 @@
 package moe.caa.fabric.hadesgame.handler
 
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import moe.caa.fabric.hadesgame.GameCore
-import moe.caa.fabric.hadesgame.GameCore.coroutineScope
-import net.minecraft.scoreboard.ScoreboardCriterion
-import net.minecraft.scoreboard.ScoreboardDisplaySlot
-import net.minecraft.scoreboard.ScoreboardObjective
-import net.minecraft.scoreboard.ServerScoreboard
+import net.minecraft.scoreboard.*
 import net.minecraft.text.Style
 import net.minecraft.text.Text
 import java.awt.Color
@@ -16,6 +10,16 @@ import java.awt.Color
 object ScoreboardHandler {
     private lateinit var serverScoreboard: ServerScoreboard
     private lateinit var scoreboardObjective: ScoreboardObjective
+
+    private val scoreHolder = HashMap<String, ScoreHolder>()
+
+    private val scoreboardTitle by lazy {
+        Text.empty().append(
+            Text.literal("阴间游戏")
+                .setStyle(Style.EMPTY.withBold(true).withColor(Color.YELLOW.rgb))
+        )
+            .append(Text.literal("v3").withColor(Color.LIGHT_GRAY.rgb))
+    }
 
     fun setup() {
         serverScoreboard = GameCore.server.scoreboard
@@ -29,50 +33,25 @@ object ScoreboardHandler {
         )
 
         serverScoreboard.setObjectiveSlot(ScoreboardDisplaySlot.SIDEBAR, scoreboardObjective)
-
-        coroutineScope.launch {
-            coroutineScope.launch {
-                while (true) {
-                    runCatching {
-                        setReversedContents(
-                            Text.empty()
-                                .append(
-                                    Text.literal("阴间游戏")
-                                        .setStyle(Style.EMPTY.withBold(true).withColor(Color.YELLOW.rgb))
-                                )
-                                .append(
-                                    Text.literal("v3").withColor(Color.DARK_GRAY.rgb)
-                                ), listOf(
-                                "",
-                                "§f下一事件:",
-                                "§a等待指令  §700:15",
-                                "",
-                                "§a存活: §c1",
-                                "",
-                                "§a边界: §c500",
-                                "",
-                                "§7{5}",
-                            ).reversed()
-                        )
-                        delay(1000)
-                    }.onFailure {
-                        GameCore.logger.error("game loop error", it)
-                    }
-                }
-            }
-        }
     }
 
-    private fun setReversedContents(title: Text, contents: List<String>) {
+    fun updateContents(title: Text = scoreboardTitle, contents: List<Text>) {
+        val contents = contents.reversed()
+
         scoreboardObjective.displayName = title
 
         for ((index, content) in contents.withIndex()) {
             val teamName = "§${index.toChar()}"
-            val team = serverScoreboard.getTeam(teamName) ?: serverScoreboard.addTeam(teamName)
 
-            team.playerList.add(teamName)
-            serverScoreboard.getOrCreateScore({ teamName }, scoreboardObjective, true).score = index
-            team.prefix = Text.literal(content)
+            serverScoreboard.getTeam(teamName) ?: serverScoreboard.addTeam(teamName)
+
+            val scoreAccess = serverScoreboard.getOrCreateScore(scoreHolder.getOrPut(teamName) {
+                ScoreHolder { teamName }
+            }, scoreboardObjective, true)
+
+            scoreAccess.score = index
+            scoreAccess.displayText = content
+
         }
 
         val shouldRemoveTeams = serverScoreboard.teams.filter { team ->
@@ -86,8 +65,8 @@ object ScoreboardHandler {
 
         shouldRemoveTeams.forEach { team ->
             team.playerList.clear()
+            scoreHolder[team.name]?.also { serverScoreboard.removeScore(it, scoreboardObjective) }
             serverScoreboard.removeTeam(team)
-            serverScoreboard.removeScore({ team.name }, scoreboardObjective)
         }
     }
 }
