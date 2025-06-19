@@ -5,6 +5,7 @@ import moe.caa.fabric.hadesgame.gameevent.AbstractGameEvent
 import moe.caa.fabric.hadesgame.handler.ScoreboardHandler
 import moe.caa.fabric.hadesgame.stage.AbstractStage
 import moe.caa.fabric.hadesgame.stage.InitStage
+import moe.caa.fabric.hadesgame.stage.WaitStage
 import moe.caa.fabric.hadesgame.util.ThreadExecutorDispatcher
 import net.minecraft.server.MinecraftServer
 import org.slf4j.Logger
@@ -33,7 +34,7 @@ object GameCore {
 
         stages = listOf(
             InitStage,
-//            WaitStage
+            WaitStage
         )
 
         ScoreboardHandler.setup()

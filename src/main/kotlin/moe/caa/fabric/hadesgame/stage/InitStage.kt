@@ -5,7 +5,10 @@ import moe.caa.fabric.hadesgame.GameCore
 import moe.caa.fabric.hadesgame.util.Location
 import moe.caa.fabric.hadesgame.util.broadcastOverlay
 import moe.caa.fabric.hadesgame.util.randomSafeLocation
+import net.minecraft.block.BlockState
+import net.minecraft.block.Blocks
 import net.minecraft.text.Text
+import net.minecraft.util.math.BlockPos
 import java.awt.Color
 import kotlin.properties.Delegates
 
@@ -15,24 +18,26 @@ object InitStage : AbstractOnlyTickOnceStage() {
 
     override val stageName = "地图初始化"
 
-    private val waitingRandomWorld by lazy { Text.literal("随机地图中...").withColor(Color.LIGHT_GRAY.rgb) }
-
     override suspend fun tickStage() {
 
         GameCore.logger.info("开始随机地图位置...")
         val tipJob = GameCore.coroutineScope.launch {
             withContext(Dispatchers.IO) {
+                var second = 0
                 while (isActive) {
-                    waitingRandomWorld.broadcastOverlay()
-                    delay(1000)
+                    second++
+                    var tip = Text.literal("随机地图中").withColor(Color.LIGHT_GRAY.rgb)
+                    repeat(second % 5 + 1) {
+                        tip = tip.append(Text.literal(".").withColor(Color.LIGHT_GRAY.rgb))
+                    }
+                    tip.broadcastOverlay()
+                    delay(500)
                 }
             }
         }
 
         val startTimeMills = System.currentTimeMillis()
-        spawnLoc = GameCore.coroutineScope.async {
-            GameCore.server.overworld.randomSafeLocation(1000)
-        }.await()
+        spawnLoc = GameCore.server.overworld.randomSafeLocation()
         tipJob.cancel()
 
         val endTimeMills = System.currentTimeMillis()
@@ -43,51 +48,62 @@ object InitStage : AbstractOnlyTickOnceStage() {
             Text.literal(" (耗时: $elapsedTime ms)").withColor(Color.LIGHT_GRAY.rgb)
         ).broadcastOverlay()
 
-        delay(10000)
+        clearLobbyArea()
+        placeLobbyBlock(Blocks.BARRIER.defaultState)
     }
-//
-//    fun placeLobbyBlock(blockState: BlockState) {
-//        // 放置大厅方块
-//
-//        // 大厅地面
-//        for (x in -10 + lobbySpawnLocation().x.toInt()..10 + lobbySpawnLocation().x.toInt()) {
-//            for (z in -10 + lobbySpawnLocation().z.toInt()..10 + lobbySpawnLocation().z.toInt()) {
-//                lobbySpawnLocation().world.setBlockState(BlockPos(x, 300, z), blockState)
-//            }
-//        }
-//
-//        // 大厅墙壁
-//        for (i in -10..10) {
-//            for (y in 300..307) {
-//                lobbySpawnLocation().world.setBlockState(
-//                    BlockPos(
-//                        (lobbySpawnLocation().x + i).toInt(),
-//                        y,
-//                        (lobbySpawnLocation().z + 10).toInt()
-//                    ), blockState
-//                )
-//                lobbySpawnLocation().world.setBlockState(
-//                    BlockPos(
-//                        (lobbySpawnLocation().x + i).toInt(),
-//                        y,
-//                        (lobbySpawnLocation().z - 10).toInt()
-//                    ), blockState
-//                )
-//                lobbySpawnLocation().world.setBlockState(
-//                    BlockPos(
-//                        (lobbySpawnLocation().x + 10).toInt(),
-//                        y,
-//                        (lobbySpawnLocation().z + i).toInt()
-//                    ), blockState
-//                )
-//                lobbySpawnLocation().world.setBlockState(
-//                    BlockPos(
-//                        (lobbySpawnLocation().x - 10).toInt(),
-//                        y,
-//                        (lobbySpawnLocation().z + i).toInt()
-//                    ), blockState
-//                )
-//            }
-//        }
-//    }
+
+    fun clearLobbyArea() {
+        for (x in -10 + spawnLoc.x.toInt()..10 + spawnLoc.x.toInt()) {
+            for (z in -10 + spawnLoc.z.toInt()..10 + spawnLoc.z.toInt()) {
+                for (y in 300..307) {
+                    spawnLoc.world.setBlockState(
+                        BlockPos(x, y, z), Blocks.AIR.defaultState
+                    )
+                }
+            }
+        }
+    }
+
+    fun placeLobbyBlock(state: BlockState) {
+        // 大厅地面
+        for (x in -10 + spawnLoc.x.toInt()..10 + spawnLoc.x.toInt()) {
+            for (z in -10 + spawnLoc.z.toInt()..10 + spawnLoc.z.toInt()) {
+                spawnLoc.world.setBlockState(BlockPos(x, 300, z), state)
+            }
+        }
+
+        // 大厅墙壁
+        for (xz in -10..10) {
+            for (y in 300..307) {
+                spawnLoc.world.setBlockState(
+                    BlockPos(
+                        (spawnLoc.x + xz).toInt(),
+                        y,
+                        (spawnLoc.z + 10).toInt()
+                    ), state
+                )
+                spawnLoc.world.setBlockState(
+                    BlockPos(
+                        (spawnLoc.x + xz).toInt(),
+                        y,
+                        (spawnLoc.z - 10).toInt()
+                    ), state
+                )
+                spawnLoc.world.setBlockState(
+                    BlockPos(
+                        (spawnLoc.x + 10).toInt(),
+                        y,
+                        (spawnLoc.z + xz).toInt()
+                    ), state
+                )
+                spawnLoc.world.setBlockState(
+                    BlockPos(
+                        (spawnLoc.x - 10).toInt(),
+                        y,
+                        (spawnLoc.z + xz).toInt()
+                    ), state
+                )
+            }
+        }
+    }
 }

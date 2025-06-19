@@ -4,6 +4,7 @@ import com.mojang.brigadier.Command
 import moe.caa.fabric.hadesgame.GameCore
 import moe.caa.fabric.hadesgame.stage.WaitStage
 import moe.caa.fabric.hadesgame.util.getPlayers
+import moe.caa.fabric.hadesgame.util.randomLocationChunkTicketType
 import net.fabricmc.api.DedicatedServerModInitializer
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
@@ -17,6 +18,8 @@ class HadesGame : DedicatedServerModInitializer {
     private val logger: Logger = LoggerFactory.getLogger("HadesGame")
 
     override fun onInitializeServer() {
+        randomLocationChunkTicketType
+
         // 启动游戏
         ServerLifecycleEvents.SERVER_STARTED.register {
             GameCore.setup(logger, it)

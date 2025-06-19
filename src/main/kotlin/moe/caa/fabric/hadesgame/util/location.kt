@@ -1,11 +1,18 @@
 package moe.caa.fabric.hadesgame.util
 
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.future.asDeferred
+import moe.caa.fabric.hadesgame.GameCore
 import net.minecraft.block.Blocks
 import net.minecraft.block.FluidBlock
 import net.minecraft.entity.Entity
+import net.minecraft.registry.Registries
+import net.minecraft.registry.Registry
+import net.minecraft.server.world.ChunkTicketType
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.math.BlockPos
+import net.minecraft.util.math.ChunkPos
 import net.minecraft.world.Heightmap
 
 fun Entity.getLocation() = Location(
@@ -35,23 +42,42 @@ data class Location(
     var pitch: Float = 0.0.toFloat(),
 )
 
-tailrec suspend fun ServerWorld.randomSafeLocation(tryPeriod: Long): Location {
+val randomLocationChunkTicketType: ChunkTicketType = Registry.register(
+    Registries.TICKET_TYPE,
+    "hadesgame:random_location",
+    ChunkTicketType(300, false, ChunkTicketType.Use.LOADING)
+)
+
+tailrec suspend fun ServerWorld.randomSafeLocation(): Location {
     val posX = (-20000000 + Math.random() * 40000000).toInt()
     val posZ = (-20000000 + Math.random() * 40000000).toInt()
 
-    getChunk(posX shr 4, posZ shr 4)
+    val chunkPos = ChunkPos(posX shr 4, posZ shr 4)
+    chunkManager.addTicket(randomLocationChunkTicketType, chunkPos, 0)
+
+    val worldChunk = GameCore.coroutineScope.async {
+        repeat(10) {
+            val chunk = chunkManager.chunkLoadingManager
+                .getCurrentChunkHolder(chunkPos.toLong())
+                ?.accessibleFuture?.asDeferred()?.await()?.orElse(null)
+            if (chunk != null) return@async chunk
+            delay(50)
+        }
+        return@async null
+    }.await()
+    if (worldChunk == null) {
+        chunkManager.removeTicket(randomLocationChunkTicketType, chunkPos, 0)
+        return randomSafeLocation()
+    }
 
     val posY = getTopY(Heightmap.Type.MOTION_BLOCKING, posX, posZ)
     val block = getBlockState(BlockPos(posX, posY - 1, posZ))
 
-
     if (block.block is FluidBlock) {
-        delay(tryPeriod)
-        return randomSafeLocation(tryPeriod)
+        return randomSafeLocation()
     }
     if (block.block == Blocks.AIR) {
-        delay(tryPeriod)
-        return randomSafeLocation(tryPeriod)
+        return randomSafeLocation()
     }
     return Location(this, posX + 0.5, posY + 0.0, posZ + 0.5)
 }
