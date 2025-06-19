@@ -1,12 +1,15 @@
 package moe.caa.fabric.hadesgame.stage
 
 import moe.caa.fabric.hadesgame.GameCore
+import moe.caa.fabric.hadesgame.handler.ScoreboardHandler
+import moe.caa.fabric.hadesgame.util.DATE_FORMAT
 import moe.caa.fabric.hadesgame.util.broadcastOverlay
 import moe.caa.fabric.hadesgame.util.resetState
 import moe.caa.fabric.hadesgame.util.teleport
 import net.minecraft.text.Text
 import net.minecraft.world.GameMode
 import java.awt.Color
+import java.time.LocalDate
 
 object WaitStage : AbstractStage() {
     override val stageName = "等待开始指令"
@@ -42,6 +45,11 @@ object WaitStage : AbstractStage() {
             } else {
                 tipAutoStart.broadcastOverlay()
             }
+
+            ScoreboardHandler.updateContents(contents = buildList {
+                add(Text.literal(DATE_FORMAT.format(LocalDate.now())).withColor(Color.LIGHT_GRAY.rgb))
+                add(Text.literal(""))
+            })
         }
     }
 
