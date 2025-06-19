@@ -27,7 +27,7 @@ object WaitStage : AbstractStage() {
         tick = 0
         shouldStartGame = false
         GameCore.server.playerManager.playerList.forEach { player ->
-            player.teleport(InitStage.lobbySpawnLocation())
+            player.teleport(InitStage.spawnLoc)
             player.changeGameMode(GameMode.ADVENTURE)
             player.resetState()
         }
@@ -52,7 +52,7 @@ object WaitStage : AbstractStage() {
 
     override suspend fun endStage() {
         GameCore.server.playerManager.playerList.forEach { player ->
-            player.teleport(InitStage.lobbySpawnLocation())
+            player.teleport(InitStage.spawnLoc)
             player.changeGameMode(GameMode.ADVENTURE)
             player.resetState()
         }

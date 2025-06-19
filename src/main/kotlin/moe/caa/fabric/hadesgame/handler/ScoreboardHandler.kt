@@ -2,6 +2,7 @@ package moe.caa.fabric.hadesgame.handler
 
 import moe.caa.fabric.hadesgame.GameCore
 import net.minecraft.scoreboard.*
+import net.minecraft.scoreboard.number.BlankNumberFormat
 import net.minecraft.text.Style
 import net.minecraft.text.Text
 import java.awt.Color
@@ -23,6 +24,10 @@ object ScoreboardHandler {
 
     fun setup() {
         serverScoreboard = GameCore.server.scoreboard
+        serverScoreboard.getNullableObjective("hades_game_scoreboard")?.also { board ->
+            serverScoreboard.removeObjective(board)
+        }
+
         scoreboardObjective = serverScoreboard.addObjective(
             "hades_game_scoreboard",
             ScoreboardCriterion.DUMMY,
@@ -41,7 +46,7 @@ object ScoreboardHandler {
         scoreboardObjective.displayName = title
 
         for ((index, content) in contents.withIndex()) {
-            val teamName = "§${index.toChar()}"
+            val teamName = index.toString()
 
             serverScoreboard.getTeam(teamName) ?: serverScoreboard.addTeam(teamName)
 
@@ -51,16 +56,13 @@ object ScoreboardHandler {
 
             scoreAccess.score = index
             scoreAccess.displayText = content
-
+            scoreAccess.setNumberFormat(BlankNumberFormat.INSTANCE)
         }
 
         val shouldRemoveTeams = serverScoreboard.teams.filter { team ->
             val name = team.name
-            if (!name.startsWith("§") || name.length != 2) {
-                return@filter true
-            }
-            val id = name[1].code
-            return@filter id >= contents.size
+            val index = name.toIntOrNull() ?: return@filter true
+            return@filter index >= contents.size
         }
 
         shouldRemoveTeams.forEach { team ->

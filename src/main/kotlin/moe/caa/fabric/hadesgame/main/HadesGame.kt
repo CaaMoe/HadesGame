@@ -33,6 +33,7 @@ class HadesGame : DedicatedServerModInitializer {
             }
 
             dispatcher.register(
+
                 literal("game").then(literal("start").executes { context ->
                     if (GameCore.currentStage() == WaitStage) {
                         if (getPlayers().size <= 1) {
