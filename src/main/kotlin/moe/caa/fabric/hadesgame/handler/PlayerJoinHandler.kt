@@ -2,7 +2,7 @@ package moe.caa.fabric.hadesgame.handler
 
 import moe.caa.fabric.hadesgame.GameCore
 import moe.caa.fabric.hadesgame.event.OnHello
-import moe.caa.fabric.hadesgame.event.asyncHelloEvent
+import moe.caa.fabric.hadesgame.event.networkHelloEvent
 import moe.caa.fabric.hadesgame.stage.InitStage
 import moe.caa.fabric.hadesgame.stage.WaitStage
 import moe.caa.fabric.hadesgame.util.teleport
@@ -13,7 +13,8 @@ import java.awt.Color
 
 object PlayerJoinHandler {
     fun init() {
-        asyncHelloEvent.register {
+
+        networkHelloEvent.register {
             if (runCatching { InitStage.lobbyLoc() }.getOrNull() == null) {
                 return@register OnHello.Result.KICK(
                     Text.literal("请稍后再试, 游戏尚未初始化完成!").withColor(Color.RED.rgb)

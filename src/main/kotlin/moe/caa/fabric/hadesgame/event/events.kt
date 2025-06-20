@@ -1,11 +1,12 @@
 package moe.caa.fabric.hadesgame.event
 
+import moe.caa.fabric.hadesgame.event.OnHello.Result.KICK
 import net.fabricmc.fabric.api.event.Event
 import net.fabricmc.fabric.api.event.EventFactory
 import net.minecraft.server.network.ServerLoginNetworkHandler
 import net.minecraft.text.Text
 
-val asyncHelloEvent: Event<OnHello> = EventFactory.createArrayBacked(
+val networkHelloEvent: Event<OnHello> = EventFactory.createArrayBacked(
     OnHello::class.java
 ) { callbacks ->
     OnHello { handler: ServerLoginNetworkHandler ->
@@ -22,6 +23,17 @@ val asyncHelloEvent: Event<OnHello> = EventFactory.createArrayBacked(
 
 fun interface OnHello {
     fun onPreLogin(handler: ServerLoginNetworkHandler): Result
+
+    companion object {
+        fun process(handler: ServerLoginNetworkHandler): Boolean {
+            val result = networkHelloEvent.invoker().onPreLogin(handler)
+            if (result is KICK) {
+                handler.disconnect(result.reason)
+                return true
+            }
+            return false
+        }
+    }
 
     sealed interface Result {
         object ALLOWED : Result
