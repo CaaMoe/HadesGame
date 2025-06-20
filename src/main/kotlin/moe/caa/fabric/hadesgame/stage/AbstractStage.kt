@@ -1,7 +1,7 @@
 package moe.caa.fabric.hadesgame.stage
 
 // 阶段
-abstract class AbstractStage {
+sealed class AbstractStage {
     // 阶段名称
     abstract val stageName: String
 
@@ -17,4 +17,7 @@ abstract class AbstractStage {
     // 结束阶段
     // 他可能不看 shouldEndStage 的结果就执行了
     open suspend fun endStage() {}
+
+    // 下一阶段
+    abstract val nextStage: AbstractStage
 }

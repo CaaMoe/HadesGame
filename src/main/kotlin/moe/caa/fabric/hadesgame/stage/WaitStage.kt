@@ -13,6 +13,8 @@ import java.time.LocalDate
 
 object WaitStage : AbstractStage() {
     override val stageName = "等待开始指令"
+    override val nextStage = InitStage
+
     var autoStart = false
     var shouldStartGame = false
     private var tick = 0
@@ -30,7 +32,7 @@ object WaitStage : AbstractStage() {
         tick = 0
         shouldStartGame = false
         GameCore.server.playerManager.playerList.forEach { player ->
-            player.teleport(InitStage.spawnLoc.copy(y = 301.0))
+            player.teleport(InitStage.lobbyLoc())
             player.changeGameMode(GameMode.ADVENTURE)
             player.resetState()
         }
@@ -60,7 +62,7 @@ object WaitStage : AbstractStage() {
 
     override suspend fun endStage() {
         GameCore.server.playerManager.playerList.forEach { player ->
-            player.teleport(InitStage.spawnLoc.copy(y = 301.0))
+            player.teleport(InitStage.lobbyLoc())
             player.changeGameMode(GameMode.ADVENTURE)
             player.resetState()
         }

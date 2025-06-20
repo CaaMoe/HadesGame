@@ -14,12 +14,14 @@ import kotlin.properties.Delegates
 
 // 地图初始化阶段
 object InitStage : AbstractOnlyTickOnceStage() {
-    var spawnLoc by Delegates.notNull<Location>()
+    private var spawnLoc by Delegates.notNull<Location>()
+
+    fun lobbyLoc() = spawnLoc.copy(y = 301.0)
 
     override val stageName = "地图初始化"
+    override val nextStage = WaitStage
 
     override suspend fun tickStage() {
-
         GameCore.logger.info("开始随机地图位置...")
         val tipJob = GameCore.coroutineScope.launch {
             withContext(Dispatchers.IO) {

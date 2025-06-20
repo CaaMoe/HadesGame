@@ -38,7 +38,7 @@ class HadesGame : DedicatedServerModInitializer {
             dispatcher.register(
 
                 literal("game").then(literal("start").executes { context ->
-                    if (GameCore.currentStage() == WaitStage) {
+                    if (GameCore.currentStage == WaitStage) {
                         if (getPlayers().size <= 1) {
                             context.source.sendFeedback({ Text.literal("至少需要 2 人才能开启一局游戏.") }, true)
                         } else {
