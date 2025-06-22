@@ -23,7 +23,7 @@ data object InitStage : AbstractStage() {
     fun lobbyLoc() = spawnLoc.copy(y = 301.0)
 
     override val stageName = "地图初始化"
-    override val nextStage = WaitStage
+    override val nextStage = WaitReadyStage
     override suspend fun shouldEndStage() = true
 
     override fun init() {

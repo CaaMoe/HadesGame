@@ -12,16 +12,18 @@ import java.awt.Color
 import java.time.LocalDateTime
 import java.util.*
 
-data object WaitStage : AbstractStage() {
+data object WaitReadyStage : AbstractStage() {
     override val stageName = "等待开始指令"
     override val nextStage = InitStage
 
-
-    var autoStart = false
-    var shouldStartGame = false
     private var tick = 0
     private var tipNoPreparedIndex = 0
     private val preparedPlayers = mutableSetOf<UUID>()
+
+    private var scheduleStart = false
+    private var scheduleStartCountdown = 8
+
+    private var shouldEndStage = false
 
     private val tipState: Text = Text.empty()
         .append(Text.literal("三击 ").withColor(Color.LIGHT_GRAY.rgb))
@@ -75,6 +77,11 @@ data object WaitStage : AbstractStage() {
                                     Text.literal("准备状态切换为: ").withColor(Color.LIGHT_GRAY.rgb)
                                         .append(Text.literal("未准备").withColor(Color.RED.rgb))
                                 )
+
+                                if(scheduleStart){
+                                    scheduleStart = false
+                                    player.name.copy().append(Text.literal("取消了准备状态, 已终止倒计时开始游戏!")).broadcast()
+                                }
                             } else {
                                 preparedPlayers.add(player.uuid)
                                 player.sendMessage(
@@ -96,10 +103,11 @@ data object WaitStage : AbstractStage() {
     }
 
     override suspend fun startStage() {
+        shouldEndStage = false
+        scheduleStart = false
         preparedPlayers.clear()
         changeStateCacheMap.clear()
         tick = 0
-        shouldStartGame = false
         GameCore.server.playerManager.playerList.forEach { player ->
             player.teleport(lobbyLoc())
             player.changeGameMode(GameMode.ADVENTURE)
@@ -114,6 +122,12 @@ data object WaitStage : AbstractStage() {
         if (players.isEmpty()) return
 
         if (players.size < 2) {
+            if(scheduleStart){
+                scheduleStart = false
+
+                Text.literal("他们都跑掉了, 只剩下你一个人...").withColor(Color.RED.rgb).broadcast()
+            }
+
             if (tick % 10 == 0) {
                 ScoreboardHandler.updateContents(contents = buildList {
                     add(Text.literal(DATE_FORMAT.format(LocalDateTime.now())).withColor(Color.LIGHT_GRAY.rgb))
@@ -184,11 +198,44 @@ data object WaitStage : AbstractStage() {
                     }
                 }
             }
+        } else {
+            if(!scheduleStart){
+                scheduleStart = true
+                scheduleStartCountdown = 8
+
+                Text.literal("所有玩家已准备就绪, 游戏将在 ").withColor(Color.YELLOW.rgb)
+                    .append(Text.literal(scheduleStartCountdown.toString()).withColor(Color.WHITE.rgb))
+                    .append(Text.literal(" 秒后开始!")).broadcast()
+            }
+            if (tick % 20 == 0) {
+                scheduleStartCountdown--
+                if(scheduleStartCountdown <= 0){
+                    shouldEndStage = true
+                }
+            }
+
+            if (tick % 10 == 0) {
+                ScoreboardHandler.updateContents(contents = buildList {
+                    add(Text.literal(DATE_FORMAT.format(LocalDateTime.now())).withColor(Color.LIGHT_GRAY.rgb))
+                    add(Text.literal("                    "))
+                    add(Text.literal(" 游戏即将开始, 请做").withColor(Color.YELLOW.rgb))
+                    add(Text.literal(" 好准备, 将在").append(Text.literal(scheduleStartCountdown.toString()).withColor(Color.WHITE.rgb)).append("秒后").withColor(Color.YELLOW.rgb))
+                    add(Text.literal(" 传送到游戏位置!"))
+                    add(Text.literal(" "))
+                    add(Text.literal("(╯°□°)╯").withColor(Color.YELLOW.rgb))
+                })
+
+                tipNotPreparedPlayers.copy()
+
+                Text.literal("游戏将在").withColor(Color.YELLOW.rgb)
+                    .append(scheduleStartCountdown.toString()).withColor(Color.WHITE.rgb)
+                    .append("秒后开始!").withColor(Color.YELLOW.rgb)
+                    .broadcastOverlay()
+            }
         }
     }
 
     override suspend fun shouldEndStage(): Boolean {
-        if (autoStart) return true
-        return shouldStartGame
+        return shouldEndStage
     }
 }
