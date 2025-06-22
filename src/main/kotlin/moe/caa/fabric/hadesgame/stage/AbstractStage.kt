@@ -1,9 +1,14 @@
 package moe.caa.fabric.hadesgame.stage
 
+import moe.caa.fabric.hadesgame.GameCore
+
 // 阶段
 sealed class AbstractStage {
     // 阶段名称
     abstract val stageName: String
+
+    // 初始化
+    open fun init() {}
 
     // 开始阶段
     open suspend fun startStage() {}
@@ -20,4 +25,6 @@ sealed class AbstractStage {
 
     // 下一阶段
     abstract val nextStage: AbstractStage
+
+    fun isCurrentRunStage(): Boolean = GameCore.currentStage == this
 }

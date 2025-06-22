@@ -2,7 +2,9 @@ package moe.caa.fabric.hadesgame.stage
 
 import moe.caa.fabric.hadesgame.GameCore
 import moe.caa.fabric.hadesgame.handler.ScoreboardHandler
+import moe.caa.fabric.hadesgame.stage.InitStage.lobbyLoc
 import moe.caa.fabric.hadesgame.util.*
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents
 import net.minecraft.text.Text
 import net.minecraft.world.GameMode
 import java.awt.Color
@@ -40,6 +42,15 @@ data object WaitStage : AbstractStage() {
         .append(Text.literal("游戏人数不足 ").withColor(Color.RED.rgb))
         .append(Text.literal("2").withColor(Color.WHITE.rgb))
         .append(Text.literal(" 人, 无法开始游戏.").withColor(Color.RED.rgb))
+
+
+    override fun init() {
+        ServerPlayerEvents.JOIN.register {
+            if (isCurrentRunStage()) {
+                it.teleport(lobbyLoc())
+            }
+        }
+    }
 
     override suspend fun startStage() {
         preparedPlayers.clear()

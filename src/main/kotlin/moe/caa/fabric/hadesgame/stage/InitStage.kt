@@ -2,9 +2,13 @@ package moe.caa.fabric.hadesgame.stage
 
 import kotlinx.coroutines.*
 import moe.caa.fabric.hadesgame.GameCore
+import moe.caa.fabric.hadesgame.event.OnHello
+import moe.caa.fabric.hadesgame.event.networkHelloEvent
 import moe.caa.fabric.hadesgame.util.Location
 import moe.caa.fabric.hadesgame.util.broadcastOverlay
 import moe.caa.fabric.hadesgame.util.randomSafeLocation
+import moe.caa.fabric.hadesgame.util.teleport
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents
 import net.minecraft.block.BlockState
 import net.minecraft.block.Blocks
 import net.minecraft.text.Text
@@ -13,13 +17,32 @@ import java.awt.Color
 import kotlin.properties.Delegates
 
 // 地图初始化阶段
-object InitStage : AbstractOnlyTickOnceStage() {
+data object InitStage : AbstractStage() {
     private var spawnLoc by Delegates.notNull<Location>()
 
     fun lobbyLoc() = spawnLoc.copy(y = 301.0)
 
     override val stageName = "地图初始化"
     override val nextStage = WaitStage
+    override suspend fun shouldEndStage() = true
+
+    override fun init() {
+        networkHelloEvent.register {
+            if (runCatching { lobbyLoc() }.getOrNull() == null) {
+                return@register OnHello.Result.KICK(
+                    Text.literal("请稍后再试, 游戏尚未初始化完成!").withColor(Color.RED.rgb)
+                )
+            }
+            return@register OnHello.Result.ALLOWED
+        }
+
+        ServerPlayerEvents.JOIN.register {
+            if (isCurrentRunStage()) {
+                it.teleport(lobbyLoc())
+            }
+        }
+    }
+
 
     override suspend fun tickStage() {
         GameCore.logger.info("开始随机地图位置...")

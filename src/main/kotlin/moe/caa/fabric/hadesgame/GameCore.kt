@@ -1,7 +1,6 @@
 package moe.caa.fabric.hadesgame
 
 import kotlinx.coroutines.*
-import moe.caa.fabric.hadesgame.handler.PlayerJoinHandler
 import moe.caa.fabric.hadesgame.handler.ScoreboardHandler
 import moe.caa.fabric.hadesgame.stage.AbstractStage
 import moe.caa.fabric.hadesgame.stage.InitStage
@@ -9,6 +8,7 @@ import moe.caa.fabric.hadesgame.util.ThreadExecutorDispatcher
 import net.minecraft.server.MinecraftServer
 import org.slf4j.Logger
 import kotlin.math.max
+import kotlin.reflect.full.createInstance
 
 object GameCore {
     lateinit var server: MinecraftServer
@@ -25,7 +25,8 @@ object GameCore {
         logger.info("正在加载 阴间游戏V3...")
 
         ScoreboardHandler.setup()
-        PlayerJoinHandler.init()
+
+        AbstractStage::class.sealedSubclasses.forEach { it.createInstance() }
 
         coroutineScope.launch {
             currentStage.startStage()
