@@ -6,6 +6,7 @@ import moe.caa.fabric.hadesgame.handler.ScoreboardHandler
 import moe.caa.fabric.hadesgame.stage.InitStage.lobbyLoc
 import moe.caa.fabric.hadesgame.util.*
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents
+import net.minecraft.sound.SoundEvents
 import net.minecraft.text.Text
 import net.minecraft.world.GameMode
 import java.awt.Color
@@ -26,7 +27,7 @@ data object WaitReadyStage : AbstractStage() {
     private var shouldEndStage = false
 
     private val tipState: Text = Text.empty()
-        .append(Text.literal("三击 ").withColor(Color.LIGHT_GRAY.rgb))
+        .append(Text.literal("双击 ").withColor(Color.LIGHT_GRAY.rgb))
         .append(Text.keybind("key.sneak").withColor(Color.WHITE.rgb))
         .append(Text.literal(" 键可切换等待状态, 当前状态: ").withColor(Color.LIGHT_GRAY.rgb))
 
@@ -47,9 +48,10 @@ data object WaitReadyStage : AbstractStage() {
         .append(Text.literal(" 人, 无法开始游戏.").withColor(Color.RED.rgb))
 
 
-    private val changeStateCacheMap = WeakHashMap<UUID, MutableList<Long>>()
+    private val changeStateCacheMap = WeakHashMap<UUID, Long>()
     override fun init() {
         ServerPlayerEvents.JOIN.register {
+            preparedPlayers.remove(it.uuid)
             if (isCurrentRunStage()) {
                 it.teleport(lobbyLoc())
             }
@@ -59,39 +61,30 @@ data object WaitReadyStage : AbstractStage() {
             if (isCurrentRunStage()) {
                 if (newSneakingState) {
                     val currentTimeMillis = System.currentTimeMillis()
-                    val longs = changeStateCacheMap.getOrPut(player.uuid) { mutableListOf() }
+                    val lastClick = changeStateCacheMap[player.uuid]
+                    if ((lastClick ?: 0) + 500 > currentTimeMillis) {
+                        // 三击Shift
+                        if (player.uuid in preparedPlayers) {
+                            preparedPlayers.remove(player.uuid)
+                            player.sendMessage(
+                                Text.literal("准备状态切换为: ").withColor(Color.LIGHT_GRAY.rgb)
+                                    .append(Text.literal("未准备").withColor(Color.RED.rgb))
+                            )
 
-
-                    longs.addFirst(currentTimeMillis)
-
-                    while (longs.size > 3) {
-                        longs.removeLast()
-                    }
-
-                    if (longs.size == 3) {
-                        if (longs[2] + 1000 > currentTimeMillis && longs[1] + 1000 > currentTimeMillis) {
-                            // 三击Shift
-                            if (player.uuid in preparedPlayers) {
-                                preparedPlayers.remove(player.uuid)
-                                player.sendMessage(
-                                    Text.literal("准备状态切换为: ").withColor(Color.LIGHT_GRAY.rgb)
-                                        .append(Text.literal("未准备").withColor(Color.RED.rgb))
-                                )
-
-                                if(scheduleStart){
-                                    scheduleStart = false
-                                    player.name.copy().append(Text.literal("取消了准备状态, 已终止倒计时开始游戏!")).broadcast()
-                                }
-                            } else {
-                                preparedPlayers.add(player.uuid)
-                                player.sendMessage(
-                                    Text.literal("准备状态切换为: ").withColor(Color.LIGHT_GRAY.rgb)
-                                        .append(Text.literal("已准备").withColor(Color.GREEN.rgb))
-                                )
+                            if (scheduleStart) {
+                                scheduleStart = false
+                                player.name.copy().append(Text.literal("取消了准备状态, 已终止倒计时开始游戏!"))
+                                    .broadcast()
                             }
-                            longs.clear()
+                        } else {
+                            preparedPlayers.add(player.uuid)
+                            player.sendMessage(
+                                Text.literal("准备状态切换为: ").withColor(Color.LIGHT_GRAY.rgb)
+                                    .append(Text.literal("已准备").withColor(Color.GREEN.rgb))
+                            )
                         }
                     }
+                    changeStateCacheMap[player.uuid] = currentTimeMillis
                 }
             }
         }
@@ -125,7 +118,7 @@ data object WaitReadyStage : AbstractStage() {
             if(scheduleStart){
                 scheduleStart = false
 
-                Text.literal("他们都跑掉了, 只剩下你一个人...").withColor(Color.RED.rgb).broadcast()
+                Text.literal("他们都跑掉了...").withColor(Color.RED.rgb).broadcast()
             }
 
             if (tick % 10 == 0) {
@@ -192,7 +185,7 @@ data object WaitReadyStage : AbstractStage() {
                                 .append(Text.literal("(").withColor(Color.LIGHT_GRAY.rgb))
                                 .append(Text.literal(noPreparedPlayers.size.toString()).withColor(Color.RED.rgb))
                                 .append(Text.literal("): ").withColor(Color.LIGHT_GRAY.rgb))
-                                .append(noPreparedPlayers[tipNoPreparedIndex % noPreparedPlayers.size].name)
+                                .append(noPreparedPlayers[tipNoPreparedIndex++ % noPreparedPlayers.size].name)
                                 .broadcastOverlay()
                         }
                     }
@@ -206,6 +199,8 @@ data object WaitReadyStage : AbstractStage() {
                 Text.literal("所有玩家已准备就绪, 游戏将在 ").withColor(Color.YELLOW.rgb)
                     .append(Text.literal(scheduleStartCountdown.toString()).withColor(Color.WHITE.rgb))
                     .append(Text.literal(" 秒后开始!")).broadcast()
+
+                SoundEvents.GOAT_HORN_SOUNDS[1].value().broadcast(0.6F, 1F)
             }
             if (tick % 20 == 0) {
                 scheduleStartCountdown--
@@ -217,19 +212,23 @@ data object WaitReadyStage : AbstractStage() {
             if (tick % 10 == 0) {
                 ScoreboardHandler.updateContents(contents = buildList {
                     add(Text.literal(DATE_FORMAT.format(LocalDateTime.now())).withColor(Color.LIGHT_GRAY.rgb))
-                    add(Text.literal("                    "))
-                    add(Text.literal(" 游戏即将开始, 请做").withColor(Color.YELLOW.rgb))
-                    add(Text.literal(" 好准备, 将在").append(Text.literal(scheduleStartCountdown.toString()).withColor(Color.WHITE.rgb)).append("秒后").withColor(Color.YELLOW.rgb))
-                    add(Text.literal(" 传送到游戏位置!"))
+                    add(Text.literal("                        "))
+                    add(Text.literal(" 游戏即将开始, 请做").withColor(Color.WHITE.rgb))
+                    add(
+                        Text.literal(" 好准备, 将在")
+                            .append(Text.literal(scheduleStartCountdown.toString()).withColor(Color.RED.rgb))
+                            .append("秒后").withColor(Color.WHITE.rgb)
+                    )
+                    add(Text.literal(" 传送到游戏位置!").withColor(Color.WHITE.rgb))
                     add(Text.literal(" "))
                     add(Text.literal("(╯°□°)╯").withColor(Color.YELLOW.rgb))
                 })
 
                 tipNotPreparedPlayers.copy()
 
-                Text.literal("游戏将在").withColor(Color.YELLOW.rgb)
-                    .append(scheduleStartCountdown.toString()).withColor(Color.WHITE.rgb)
-                    .append("秒后开始!").withColor(Color.YELLOW.rgb)
+                Text.literal("游戏将在").withColor(Color.WHITE.rgb)
+                    .append(scheduleStartCountdown.toString()).withColor(Color.YELLOW.rgb)
+                    .append("秒后开始!").withColor(Color.WHITE.rgb)
                     .broadcastOverlay()
             }
         }
