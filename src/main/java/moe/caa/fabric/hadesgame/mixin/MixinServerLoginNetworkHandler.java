@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MixinServerLoginNetworkHandler {
     @Inject(method = "onHello", at = @At("HEAD"), cancellable = true)
     private void onOnHello(LoginHelloC2SPacket packet, CallbackInfo ci) {
-        if (OnHello.Companion.process((ServerLoginNetworkHandler) (Object) this)) {
+        if (OnHello.Companion.shouldCancel((ServerLoginNetworkHandler) (Object) this)) {
             ci.cancel();
         }
     }

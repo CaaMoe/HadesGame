@@ -13,7 +13,6 @@ import java.awt.Color
 
 object PlayerJoinHandler {
     fun init() {
-
         networkHelloEvent.register {
             if (runCatching { InitStage.lobbyLoc() }.getOrNull() == null) {
                 return@register OnHello.Result.KICK(

@@ -25,7 +25,7 @@ fun interface OnHello {
     fun onPreLogin(handler: ServerLoginNetworkHandler): Result
 
     companion object {
-        fun process(handler: ServerLoginNetworkHandler): Boolean {
+        fun shouldCancel(handler: ServerLoginNetworkHandler): Boolean {
             val result = networkHelloEvent.invoker().onPreLogin(handler)
             if (result is KICK) {
                 handler.disconnect(result.reason)
