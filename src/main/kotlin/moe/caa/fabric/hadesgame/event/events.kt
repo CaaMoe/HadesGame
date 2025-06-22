@@ -4,6 +4,7 @@ import moe.caa.fabric.hadesgame.event.OnHello.Result.KICK
 import net.fabricmc.fabric.api.event.Event
 import net.fabricmc.fabric.api.event.EventFactory
 import net.minecraft.server.network.ServerLoginNetworkHandler
+import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
 
 val networkHelloEvent: Event<OnHello> = EventFactory.createArrayBacked(
@@ -20,7 +21,6 @@ val networkHelloEvent: Event<OnHello> = EventFactory.createArrayBacked(
     }
 }
 
-
 fun interface OnHello {
     fun onPreLogin(handler: ServerLoginNetworkHandler): Result
 
@@ -36,7 +36,28 @@ fun interface OnHello {
     }
 
     sealed interface Result {
-        object ALLOWED : Result
+        data object ALLOWED : Result
         class KICK(val reason: Text) : Result
+    }
+}
+
+
+val sneakStateChangeEvent: Event<OnSneakStateChange> = EventFactory.createArrayBacked(
+    OnSneakStateChange::class.java
+) { callbacks ->
+    OnSneakStateChange { player: ServerPlayerEntity, newSneakingState: Boolean ->
+        for (callback in callbacks) {
+            callback.onSneakStateChange(player, newSneakingState)
+        }
+    }
+}
+
+fun interface OnSneakStateChange {
+    fun onSneakStateChange(player: ServerPlayerEntity, newSneakingState: Boolean)
+
+    companion object {
+        fun trigger(player: ServerPlayerEntity, newSneakingState: Boolean) {
+            sneakStateChangeEvent.invoker().onSneakStateChange(player, newSneakingState)
+        }
     }
 }

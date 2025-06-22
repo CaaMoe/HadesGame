@@ -8,7 +8,6 @@ import moe.caa.fabric.hadesgame.util.ThreadExecutorDispatcher
 import net.minecraft.server.MinecraftServer
 import org.slf4j.Logger
 import kotlin.math.max
-import kotlin.reflect.full.createInstance
 
 object GameCore {
     lateinit var server: MinecraftServer
@@ -26,7 +25,7 @@ object GameCore {
 
         ScoreboardHandler.setup()
 
-        AbstractStage::class.sealedSubclasses.forEach { it.createInstance() }
+        AbstractStage::class.sealedSubclasses.map { it.objectInstance!! }.forEach { it.init() }
 
         coroutineScope.launch {
             currentStage.startStage()
