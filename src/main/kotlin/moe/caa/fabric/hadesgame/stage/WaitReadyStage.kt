@@ -73,7 +73,7 @@ data object WaitReadyStage : AbstractStage() {
 
                             if (scheduleStart) {
                                 scheduleStart = false
-                                player.name.copy().append(Text.literal("取消了准备状态, 已终止倒计时开始游戏!"))
+                                player.name.copy().append(Text.literal("取消了准备状态, 已终止倒计时开始游戏!").withColor(Color.RED.rgb))
                                     .broadcast()
                             }
                         } else {
@@ -224,11 +224,9 @@ data object WaitReadyStage : AbstractStage() {
                     add(Text.literal("(╯°□°)╯").withColor(Color.YELLOW.rgb))
                 })
 
-                tipNotPreparedPlayers.copy()
-
-                Text.literal("游戏将在").withColor(Color.WHITE.rgb)
-                    .append(scheduleStartCountdown.toString()).withColor(Color.YELLOW.rgb)
-                    .append("秒后开始!").withColor(Color.WHITE.rgb)
+                Text.literal("游戏将在 ").withColor(Color.LIGHT_GRAY.rgb)
+                    .append(Text.literal(scheduleStartCountdown.toString()).withColor(Color.RED.rgb))
+                    .append(" 秒后开始!").withColor(Color.LIGHT_GRAY.rgb)
                     .broadcastOverlay()
             }
         }
