@@ -1,5 +1,7 @@
 package moe.caa.fabric.hadesgame.stage
 
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import moe.caa.fabric.hadesgame.GameCore
 import moe.caa.fabric.hadesgame.event.sneakStateChangeEvent
 import moe.caa.fabric.hadesgame.handler.ScoreboardHandler
@@ -200,7 +202,14 @@ data object WaitReadyStage : AbstractStage() {
                     .append(Text.literal(scheduleStartCountdown.toString()).withColor(Color.WHITE.rgb))
                     .append(Text.literal(" 秒后开始!")).broadcast()
 
-                SoundEvents.GOAT_HORN_SOUNDS[1].value().broadcast(0.6F, 1F)
+                GameCore.coroutineScope.launch {
+                    repeat(8){
+                        SoundEvents.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE.value().broadcast(2F, 1000F)
+                        delay(100)
+                    }
+                    delay(100)
+                    SoundEvents.GOAT_HORN_SOUNDS[0].value().broadcast(1.2F, 1000F)
+                }
             }
             if (tick % 20 == 0) {
                 scheduleStartCountdown--
