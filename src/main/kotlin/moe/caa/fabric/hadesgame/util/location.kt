@@ -71,7 +71,7 @@ tailrec suspend fun ServerWorld.randomLobbySpawnLocation(): Location {
         return randomLobbySpawnLocation()
     }
 
-    val posY = getTopY(Heightmap.Type.MOTION_BLOCKING, posX, posZ)
+    val posY = getTopY(Heightmap.Type.WORLD_SURFACE, posX, posZ)
     val block = getBlockState(BlockPos(posX, posY - 1, posZ))
 
     if (block.block is FluidBlock) {
@@ -84,7 +84,7 @@ tailrec suspend fun ServerWorld.randomLobbySpawnLocation(): Location {
     var platformMaxY = 0
     for (x in -10..10) {
         for (z in -10..10) {
-            platformMaxY = max(platformMaxY, getTopY(Heightmap.Type.MOTION_BLOCKING, x, z))
+            platformMaxY = max(platformMaxY, getTopY(Heightmap.Type.WORLD_SURFACE, x, z))
         }
     }
 

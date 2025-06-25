@@ -65,6 +65,7 @@ data object WaitReadyStage : AbstractStage() {
                     val currentTimeMillis = System.currentTimeMillis()
                     val lastClick = changeStateCacheMap[player.uuid]
                     if ((lastClick ?: 0) + 500 > currentTimeMillis) {
+                        changeStateCacheMap.remove(player.uuid)
                         SoundEvents.UI_BUTTON_CLICK.value().playSound(player, 2F, 1000F)
 
                         // 三击Shift
@@ -92,8 +93,9 @@ data object WaitReadyStage : AbstractStage() {
                                     .append(Text.literal("已准备").withColor(Color.GREEN.rgb))
                             )
                         }
+                    } else {
+                        changeStateCacheMap[player.uuid] = currentTimeMillis
                     }
-                    changeStateCacheMap[player.uuid] = currentTimeMillis
                 }
             }
         }
@@ -113,7 +115,7 @@ data object WaitReadyStage : AbstractStage() {
 
         // 塞, 硬塞, 私密马塞
         repeat(24) {
-            SoundEvents.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE.value().broadcast(1000F, 2F)
+            SoundEvents.BLOCK_NOTE_BLOCK_BIT.value().broadcast(1000F, 2F)
             Text.literal("笼子即将打开").withColor(Color.LIGHT_GRAY.rgb).broadcastOverlay()
             delay(100)
         }
