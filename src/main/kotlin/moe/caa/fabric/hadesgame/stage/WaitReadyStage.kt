@@ -1,13 +1,14 @@
 package moe.caa.fabric.hadesgame.stage
 
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import moe.caa.fabric.hadesgame.GameCore
 import moe.caa.fabric.hadesgame.event.sneakStateChangeEvent
 import moe.caa.fabric.hadesgame.handler.ScoreboardHandler
 import moe.caa.fabric.hadesgame.stage.InitStage.lobbyLoc
 import moe.caa.fabric.hadesgame.util.*
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents
+import net.minecraft.block.Blocks
+import net.minecraft.particle.ParticleTypes
 import net.minecraft.sound.SoundEvents
 import net.minecraft.text.Text
 import net.minecraft.world.GameMode
@@ -24,7 +25,7 @@ data object WaitReadyStage : AbstractStage() {
     private val preparedPlayers = mutableSetOf<UUID>()
 
     private var scheduleStart = false
-    private var scheduleStartCountdown = 8
+    private var scheduleStartCountdown = 5
 
     private var shouldEndStage = false
 
@@ -65,6 +66,8 @@ data object WaitReadyStage : AbstractStage() {
                     val currentTimeMillis = System.currentTimeMillis()
                     val lastClick = changeStateCacheMap[player.uuid]
                     if ((lastClick ?: 0) + 500 > currentTimeMillis) {
+                        SoundEvents.UI_BUTTON_CLICK.value().playSound(player, 2F, 1000F)
+
                         // 三击Shift
                         if (player.uuid in preparedPlayers) {
                             preparedPlayers.remove(player.uuid)
@@ -75,8 +78,13 @@ data object WaitReadyStage : AbstractStage() {
 
                             if (scheduleStart) {
                                 scheduleStart = false
-                                player.name.copy().append(Text.literal("取消了准备状态, 已终止倒计时开始游戏!").withColor(Color.RED.rgb))
+                                player.name.copy().append(
+                                    Text.literal("取消了准备状态, 已终止倒计时开始游戏!").withColor(Color.RED.rgb)
+                                )
                                     .broadcast()
+
+
+                                SoundEvents.UI_BUTTON_CLICK.value().playSound(player, 2F, 1000F)
                             }
                         } else {
                             preparedPlayers.add(player.uuid)
@@ -95,6 +103,42 @@ data object WaitReadyStage : AbstractStage() {
     override suspend fun endStage() {
         changeStateCacheMap.clear()
         preparedPlayers.clear()
+
+        ScoreboardHandler.updateContents(contents = buildList {
+            add(Text.literal(DATE_FORMAT.format(LocalDateTime.now())).withColor(Color.LIGHT_GRAY.rgb))
+            add(Text.literal(" "))
+            add(Text.literal(" 笼子即将打开 "))
+            add(Text.literal(" "))
+            add(Text.literal("(╯°□°)╯").withColor(Color.YELLOW.rgb))
+        })
+
+        // 塞, 硬塞, 私密马塞
+        repeat(24) {
+            SoundEvents.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE.value().broadcast(1000F, 2F)
+            Text.literal("笼子即将打开").withColor(Color.LIGHT_GRAY.rgb).broadcastOverlay()
+            delay(100)
+        }
+        delay(100)
+        SoundEvents.ENTITY_GENERIC_EXPLODE.value().broadcast(1000F, 0F)
+        for (viewer in getPlayers()) {
+            viewer.world.spawnParticles(
+                viewer,
+                ParticleTypes.EXPLOSION_EMITTER,
+                false,
+                false,
+                lobbyLoc().x,
+                lobbyLoc().y,
+                lobbyLoc().z,
+                1,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            )
+        }
+
+        InitStage.placeLobbyBlock(Blocks.AIR.defaultState)
+        delay(10000)
     }
 
     override suspend fun startStage() {
@@ -117,10 +161,8 @@ data object WaitReadyStage : AbstractStage() {
         if (players.isEmpty()) return
 
         if (players.size < 2) {
-            if(scheduleStart){
+            if (scheduleStart) {
                 scheduleStart = false
-
-                Text.literal("他们都跑掉了...").withColor(Color.RED.rgb).broadcast()
             }
 
             if (tick % 10 == 0) {
@@ -155,7 +197,10 @@ data object WaitReadyStage : AbstractStage() {
                     )
                     add(
                         Text.literal("已准备: ").withColor(Color.WHITE.rgb)
-                            .append(Text.literal(players.filter { it.uuid in preparedPlayers }.size.toString()).withColor(Color.YELLOW.rgb))
+                            .append(
+                                Text.literal(players.filter { it.uuid in preparedPlayers }.size.toString())
+                                    .withColor(Color.YELLOW.rgb)
+                            )
                     )
                     add(Text.literal(" "))
                     add(Text.literal("(╯°□°)╯").withColor(Color.YELLOW.rgb))
@@ -194,26 +239,17 @@ data object WaitReadyStage : AbstractStage() {
                 }
             }
         } else {
-            if(!scheduleStart){
+            if (!scheduleStart) {
                 scheduleStart = true
-                scheduleStartCountdown = 8
+                scheduleStartCountdown = 5
 
-                Text.literal("所有玩家已准备就绪, 游戏将在 ").withColor(Color.YELLOW.rgb)
-                    .append(Text.literal(scheduleStartCountdown.toString()).withColor(Color.WHITE.rgb))
-                    .append(Text.literal(" 秒后开始!")).broadcast()
+                SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP.broadcast(1000F, 2F)
 
-                GameCore.coroutineScope.launch {
-                    repeat(8){
-                        SoundEvents.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE.value().broadcast(2F, 1000F)
-                        delay(100)
-                    }
-                    delay(100)
-                    SoundEvents.GOAT_HORN_SOUNDS[0].value().broadcast(1.2F, 1000F)
-                }
+                Text.literal("所有玩家已准备就绪, 游戏即将开始!").withColor(Color.GREEN.rgb).broadcast()
             }
             if (tick % 20 == 0) {
                 scheduleStartCountdown--
-                if(scheduleStartCountdown <= 0){
+                if (scheduleStartCountdown <= 0) {
                     shouldEndStage = true
                 }
             }

@@ -73,20 +73,7 @@ data object InitStage : AbstractStage() {
             Text.literal(" (耗时: $elapsedTime ms)").withColor(Color.LIGHT_GRAY.rgb)
         ).broadcastOverlay()
 
-        clearLobbyArea()
         placeLobbyBlock(Blocks.BARRIER.defaultState)
-    }
-
-    fun clearLobbyArea() {
-        for (x in -10 + spawnLoc.x.toInt()..10 + spawnLoc.x.toInt()) {
-            for (z in -10 + spawnLoc.z.toInt()..10 + spawnLoc.z.toInt()) {
-                for (y in 300..307) {
-                    spawnLoc.world.setBlockState(
-                        BlockPos(x, y, z), Blocks.AIR.defaultState
-                    )
-                }
-            }
-        }
     }
 
     fun placeLobbyBlock(state: BlockState) {
