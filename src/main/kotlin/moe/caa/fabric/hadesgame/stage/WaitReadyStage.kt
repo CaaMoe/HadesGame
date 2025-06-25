@@ -120,20 +120,22 @@ data object WaitReadyStage : AbstractStage() {
         delay(100)
         SoundEvents.ENTITY_GENERIC_EXPLODE.value().broadcast(1000F, 0F)
         for (viewer in getPlayers()) {
-            viewer.world.spawnParticles(
-                viewer,
-                ParticleTypes.EXPLOSION_EMITTER,
-                false,
-                false,
-                InitStage.lobbySpawnLoc.x,
-                InitStage.lobbySpawnLoc.y,
-                InitStage.lobbySpawnLoc.z,
-                1,
-                0.0,
-                0.0,
-                0.0,
-                0.0
-            )
+            for (pos in getPlayers().map { it.pos }) {
+                viewer.world.spawnParticles(
+                    viewer,
+                    ParticleTypes.EXPLOSION_EMITTER,
+                    false,
+                    false,
+                    pos.x,
+                    pos.y,
+                    pos.z,
+                    1,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                )
+            }
         }
 
         InitStage.placeLobbyBlock(Blocks.AIR.defaultState)

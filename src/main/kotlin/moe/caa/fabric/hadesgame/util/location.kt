@@ -88,9 +88,9 @@ tailrec suspend fun ServerWorld.randomLobbySpawnLocation(): Location {
         }
     }
 
-    if (platformMaxY + 20 > height) {
+    if (platformMaxY + 40 > height) {
         return randomLobbySpawnLocation()
     }
 
-    return Location(this, posX + 0.5, posY + 10.0, posZ + 0.5)
+    return Location(this, posX + 0.5, posY + 20.0, posZ + 0.5)
 }

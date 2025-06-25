@@ -78,13 +78,13 @@ data object InitStage : AbstractStage() {
         // 大厅地面
         for (x in -10 + lobbySpawnLoc.x.toInt()..10 + lobbySpawnLoc.x.toInt()) {
             for (z in -10 + lobbySpawnLoc.z.toInt()..10 + lobbySpawnLoc.z.toInt()) {
-                lobbySpawnLoc.world.setBlockState(BlockPos(x, lobbySpawnLoc.y.toInt(), z), state)
+                lobbySpawnLoc.world.setBlockState(BlockPos(x, lobbySpawnLoc.y.toInt() - 2, z), state)
             }
         }
 
         // 大厅墙壁
         for (xz in -10..10) {
-            for (y in lobbySpawnLoc.y.toInt()..lobbySpawnLoc.y.toInt() + 7) {
+            for (y in lobbySpawnLoc.y.toInt() - 2..lobbySpawnLoc.y.toInt() + 7) {
                 lobbySpawnLoc.world.setBlockState(
                     BlockPos(
                         (lobbySpawnLoc.x + xz).toInt(),
