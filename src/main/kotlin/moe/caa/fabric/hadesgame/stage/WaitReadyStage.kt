@@ -4,7 +4,6 @@ import kotlinx.coroutines.delay
 import moe.caa.fabric.hadesgame.GameCore
 import moe.caa.fabric.hadesgame.event.sneakStateChangeEvent
 import moe.caa.fabric.hadesgame.handler.ScoreboardHandler
-import moe.caa.fabric.hadesgame.stage.InitStage.lobbyLoc
 import moe.caa.fabric.hadesgame.util.*
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents
 import net.minecraft.block.Blocks
@@ -56,7 +55,7 @@ data object WaitReadyStage : AbstractStage() {
         ServerPlayerEvents.JOIN.register {
             preparedPlayers.remove(it.uuid)
             if (isCurrentRunStage()) {
-                it.teleport(lobbyLoc())
+                it.teleport(InitStage.lobbySpawnLoc)
             }
         }
 
@@ -126,9 +125,9 @@ data object WaitReadyStage : AbstractStage() {
                 ParticleTypes.EXPLOSION_EMITTER,
                 false,
                 false,
-                lobbyLoc().x,
-                lobbyLoc().y,
-                lobbyLoc().z,
+                InitStage.lobbySpawnLoc.x,
+                InitStage.lobbySpawnLoc.y,
+                InitStage.lobbySpawnLoc.z,
                 1,
                 0.0,
                 0.0,
@@ -148,7 +147,7 @@ data object WaitReadyStage : AbstractStage() {
         changeStateCacheMap.clear()
         tick = 0
         GameCore.server.playerManager.playerList.forEach { player ->
-            player.teleport(lobbyLoc())
+            player.teleport(InitStage.lobbySpawnLoc)
             player.changeGameMode(GameMode.ADVENTURE)
             player.resetState()
         }

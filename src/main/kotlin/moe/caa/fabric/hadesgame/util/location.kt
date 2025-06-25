@@ -14,6 +14,7 @@ import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.ChunkPos
 import net.minecraft.world.Heightmap
+import kotlin.math.max
 
 fun Entity.getLocation() = Location(
     this.world as ServerWorld,
@@ -48,7 +49,7 @@ val randomLocationChunkTicketType: ChunkTicketType = Registry.register(
     ChunkTicketType(300, false, ChunkTicketType.Use.LOADING)
 )
 
-tailrec suspend fun ServerWorld.randomSafeLocation(): Location {
+tailrec suspend fun ServerWorld.randomLobbySpawnLocation(): Location {
     val posX = (-20000000 + Math.random() * 40000000).toInt()
     val posZ = (-20000000 + Math.random() * 40000000).toInt()
 
@@ -67,17 +68,29 @@ tailrec suspend fun ServerWorld.randomSafeLocation(): Location {
     }.await()
     if (worldChunk == null) {
         chunkManager.removeTicket(randomLocationChunkTicketType, chunkPos, 0)
-        return randomSafeLocation()
+        return randomLobbySpawnLocation()
     }
 
     val posY = getTopY(Heightmap.Type.MOTION_BLOCKING, posX, posZ)
     val block = getBlockState(BlockPos(posX, posY - 1, posZ))
 
     if (block.block is FluidBlock) {
-        return randomSafeLocation()
+        return randomLobbySpawnLocation()
     }
     if (block.block == Blocks.AIR) {
-        return randomSafeLocation()
+        return randomLobbySpawnLocation()
     }
-    return Location(this, posX + 0.5, posY + 0.0, posZ + 0.5)
+
+    var platformMaxY = 0
+    for (x in -10..10) {
+        for (z in -10..10) {
+            platformMaxY = max(platformMaxY, getTopY(Heightmap.Type.MOTION_BLOCKING, x, z))
+        }
+    }
+
+    if (platformMaxY + 20 > height) {
+        return randomLobbySpawnLocation()
+    }
+
+    return Location(this, posX + 0.5, posY + 10.0, posZ + 0.5)
 }
