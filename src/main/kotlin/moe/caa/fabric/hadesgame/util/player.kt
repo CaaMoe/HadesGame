@@ -17,10 +17,16 @@ fun ServerPlayerEntity.resetState() {
     experienceProgress = 0.toFloat()
     totalExperience = 0
 
+
+    heal()
+    sendAbilitiesUpdate()
+}
+
+fun ServerPlayerEntity.heal() {
     hungerManager.foodLevel = 20
     hungerManager.saturationLevel = 5.0f
     health = maxHealth
-
-    statusEffects.forEach { removeStatusEffect(it.effectType) }
-    sendAbilitiesUpdate()
+    kotlin.runCatching {
+        statusEffects.forEach { removeStatusEffect(it.effectType) }
+    }
 }

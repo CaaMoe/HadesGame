@@ -41,6 +41,11 @@ data object InitStage : AbstractStage() {
         }
     }
 
+    override suspend fun endStage() {
+        val border = GameCore.server.overworld.worldBorder
+        border.setCenter(lobbySpawnLoc.x, lobbySpawnLoc.z)
+        border.size = 500.0
+    }
 
     override suspend fun tickStage() {
         GameCore.logger.info("开始随机地图位置...")

@@ -3,16 +3,45 @@ package moe.caa.fabric.hadesgame.event
 import moe.caa.fabric.hadesgame.event.OnHello.Result.KICK
 import net.fabricmc.fabric.api.event.Event
 import net.fabricmc.fabric.api.event.EventFactory
+import net.minecraft.entity.LivingEntity
+import net.minecraft.entity.damage.DamageSource
 import net.minecraft.server.network.ServerLoginNetworkHandler
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
+
+val preDeathEvent: Event<OnPreDeath> = EventFactory.createArrayBacked(
+    OnPreDeath::class.java
+) { callbacks ->
+    OnPreDeath { livingEntity: LivingEntity, damageSource: DamageSource ->
+        for (callback in callbacks) {
+            when (callback.onPreDeath(livingEntity, damageSource)) {
+                true -> {
+                    return@OnPreDeath true
+                }
+
+                false -> {}
+            }
+        }
+        return@OnPreDeath false
+    }
+}
+
+fun interface OnPreDeath {
+    fun onPreDeath(livingEntity: LivingEntity, damageSource: DamageSource): Boolean
+
+    companion object {
+        fun shouldCancel(livingEntity: LivingEntity, damageSource: DamageSource): Boolean {
+            return preDeathEvent.invoker().onPreDeath(livingEntity, damageSource)
+        }
+    }
+}
 
 val networkHelloEvent: Event<OnHello> = EventFactory.createArrayBacked(
     OnHello::class.java
 ) { callbacks ->
     OnHello { handler: ServerLoginNetworkHandler ->
         for (callback in callbacks) {
-            when (val result = callback.onPreLogin(handler)) {
+            when (val result = callback.onHello(handler)) {
                 is OnHello.Result.ALLOWED -> {}
                 is OnHello.Result.KICK -> return@OnHello OnHello.Result.KICK(result.reason)
             }
@@ -22,11 +51,11 @@ val networkHelloEvent: Event<OnHello> = EventFactory.createArrayBacked(
 }
 
 fun interface OnHello {
-    fun onPreLogin(handler: ServerLoginNetworkHandler): Result
+    fun onHello(handler: ServerLoginNetworkHandler): Result
 
     companion object {
         fun shouldCancel(handler: ServerLoginNetworkHandler): Boolean {
-            val result = networkHelloEvent.invoker().onPreLogin(handler)
+            val result = networkHelloEvent.invoker().onHello(handler)
             if (result is KICK) {
                 handler.disconnect(result.reason)
                 return true

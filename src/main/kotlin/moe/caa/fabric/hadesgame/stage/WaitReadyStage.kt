@@ -5,9 +5,12 @@ import moe.caa.fabric.hadesgame.GameCore
 import moe.caa.fabric.hadesgame.event.sneakStateChangeEvent
 import moe.caa.fabric.hadesgame.handler.ScoreboardHandler
 import moe.caa.fabric.hadesgame.util.*
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents
 import net.minecraft.block.Blocks
+import net.minecraft.entity.Entity
 import net.minecraft.particle.ParticleTypes
+import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.sound.SoundEvents
 import net.minecraft.text.Text
 import net.minecraft.world.GameMode
@@ -16,8 +19,8 @@ import java.time.LocalDateTime
 import java.util.*
 
 data object WaitReadyStage : AbstractStage() {
-    override val stageName = "等待开始指令"
-    override val nextStage = InitStage
+    override val stageName = "等待开始"
+    override val nextStage = GamingStage
 
     private var tick = 0
     private var tipNoPreparedIndex = 0
@@ -52,11 +55,46 @@ data object WaitReadyStage : AbstractStage() {
 
     private val changeStateCacheMap = WeakHashMap<UUID, Long>()
     override fun init() {
+
         ServerPlayerEvents.JOIN.register {
             preparedPlayers.remove(it.uuid)
             if (isCurrentRunStage()) {
-                it.teleport(InitStage.lobbySpawnLoc)
+                var player = it
+                if (player.isDead) {
+                    player = GameCore.server.playerManager.respawnPlayer(
+                        player,
+                        true,
+                        Entity.RemovalReason.CHANGED_DIMENSION
+                    )
+                }
+
+                player.changeGameMode(GameMode.ADVENTURE)
+                player.teleport(InitStage.lobbySpawnLoc)
+                player.resetState()
             }
+        }
+
+        ServerLivingEntityEvents.ALLOW_DAMAGE.register { livingEntity, damageSource, _ ->
+            if (isCurrentRunStage()) {
+                if (livingEntity is ServerPlayerEntity) {
+                    if (livingEntity.world.damageSources.outOfWorld() == damageSource) {
+                        livingEntity.teleport(InitStage.lobbySpawnLoc)
+                    }
+                }
+                return@register !isCurrentRunStage()
+            }
+            return@register true
+        }
+
+        ServerLivingEntityEvents.ALLOW_DEATH.register { livingEntity, _, _ ->
+            if (isCurrentRunStage()) {
+                if (livingEntity is ServerPlayerEntity) {
+                    livingEntity.teleport(InitStage.lobbySpawnLoc)
+                    livingEntity.resetState()
+                    return@register false
+                }
+            }
+            return@register true
         }
 
         sneakStateChangeEvent.register { player, newSneakingState ->
@@ -141,7 +179,6 @@ data object WaitReadyStage : AbstractStage() {
         }
 
         InitStage.placeLobbyBlock(Blocks.AIR.defaultState)
-        delay(10000)
     }
 
     override suspend fun startStage() {
@@ -162,6 +199,25 @@ data object WaitReadyStage : AbstractStage() {
 
         val players = getPlayers()
         if (players.isEmpty()) return
+
+        if (tick % 20 == 0) {
+            for (p0 in players) {
+                var player = p0
+                if (player.isDead) {
+                    player = GameCore.server.playerManager.respawnPlayer(
+                        player,
+                        true,
+                        Entity.RemovalReason.CHANGED_DIMENSION
+                    )
+                    player.teleport(InitStage.lobbySpawnLoc)
+                }
+
+                player.heal()
+            }
+
+            GameCore.server.overworld.timeOfDay = 1000
+            GameCore.server.overworld.resetWeather()
+        }
 
         if (players.size < 2) {
             if (scheduleStart) {

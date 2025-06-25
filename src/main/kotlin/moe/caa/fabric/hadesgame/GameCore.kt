@@ -6,6 +6,7 @@ import moe.caa.fabric.hadesgame.stage.AbstractStage
 import moe.caa.fabric.hadesgame.stage.InitStage
 import moe.caa.fabric.hadesgame.util.ThreadExecutorDispatcher
 import net.minecraft.server.MinecraftServer
+import net.minecraft.world.GameRules
 import org.slf4j.Logger
 import kotlin.math.max
 
@@ -42,6 +43,8 @@ object GameCore {
                 }
             }
         }
+
+        server.overworld.gameRules.get(GameRules.DO_IMMEDIATE_RESPAWN).set(true, server)
     }
 
     private suspend fun tickInPrimaryThread() {
