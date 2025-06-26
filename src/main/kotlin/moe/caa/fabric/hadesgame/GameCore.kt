@@ -1,6 +1,9 @@
 package moe.caa.fabric.hadesgame
 
 import kotlinx.coroutines.*
+import moe.caa.fabric.hadesgame.handler.AllowDamageHandler
+import moe.caa.fabric.hadesgame.handler.DeathHandler
+import moe.caa.fabric.hadesgame.handler.JoinHandler
 import moe.caa.fabric.hadesgame.handler.ScoreboardHandler
 import moe.caa.fabric.hadesgame.stage.AbstractStage
 import moe.caa.fabric.hadesgame.stage.InitStage
@@ -25,6 +28,9 @@ object GameCore {
         logger.info("正在加载 阴间游戏V3...")
 
         ScoreboardHandler.setup()
+        AllowDamageHandler.setup()
+        JoinHandler.setup()
+        DeathHandler.setup()
 
         AbstractStage::class.sealedSubclasses.map { it.objectInstance!! }.forEach { it.init() }
 

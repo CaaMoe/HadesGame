@@ -5,12 +5,9 @@ import moe.caa.fabric.hadesgame.GameCore
 import moe.caa.fabric.hadesgame.event.sneakStateChangeEvent
 import moe.caa.fabric.hadesgame.handler.ScoreboardHandler
 import moe.caa.fabric.hadesgame.util.*
-import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
-import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents
 import net.minecraft.block.Blocks
 import net.minecraft.entity.Entity
 import net.minecraft.particle.ParticleTypes
-import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.sound.SoundEvents
 import net.minecraft.text.Text
 import net.minecraft.world.GameMode
@@ -24,7 +21,6 @@ data object WaitReadyStage : AbstractStage() {
 
     private var tick = 0
     private var tipNoPreparedIndex = 0
-    private val preparedPlayers = mutableSetOf<UUID>()
 
     private var scheduleStart = false
     private var scheduleStartCountdown = 5
@@ -52,51 +48,10 @@ data object WaitReadyStage : AbstractStage() {
         .append(Text.literal("2").withColor(Color.WHITE.rgb))
         .append(Text.literal(" 人, 无法开始游戏.").withColor(Color.RED.rgb))
 
-
+    val preparedPlayers = mutableSetOf<UUID>()
     private val changeStateCacheMap = WeakHashMap<UUID, Long>()
+
     override fun init() {
-
-        ServerPlayerEvents.JOIN.register {
-            preparedPlayers.remove(it.uuid)
-            if (isCurrentRunStage()) {
-                var player = it
-                if (player.isDead) {
-                    player = GameCore.server.playerManager.respawnPlayer(
-                        player,
-                        true,
-                        Entity.RemovalReason.CHANGED_DIMENSION
-                    )
-                }
-
-                player.changeGameMode(GameMode.ADVENTURE)
-                player.teleport(InitStage.lobbySpawnLoc)
-                player.resetState()
-            }
-        }
-
-        ServerLivingEntityEvents.ALLOW_DAMAGE.register { livingEntity, damageSource, _ ->
-            if (isCurrentRunStage()) {
-                if (livingEntity is ServerPlayerEntity) {
-                    if (livingEntity.world.damageSources.outOfWorld() == damageSource) {
-                        livingEntity.teleport(InitStage.lobbySpawnLoc)
-                    }
-                }
-                return@register !isCurrentRunStage()
-            }
-            return@register true
-        }
-
-        ServerLivingEntityEvents.ALLOW_DEATH.register { livingEntity, _, _ ->
-            if (isCurrentRunStage()) {
-                if (livingEntity is ServerPlayerEntity) {
-                    livingEntity.teleport(InitStage.lobbySpawnLoc)
-                    livingEntity.resetState()
-                    return@register false
-                }
-            }
-            return@register true
-        }
-
         sneakStateChangeEvent.register { player, newSneakingState ->
             if (isCurrentRunStage()) {
                 if (newSneakingState) {

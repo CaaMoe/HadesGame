@@ -27,6 +27,8 @@ fun ServerPlayerEntity.heal() {
     hungerManager.saturationLevel = 5.0f
     health = maxHealth
     kotlin.runCatching {
-        statusEffects.forEach { removeStatusEffect(it.effectType) }
+        for (entry in statusEffects.map { it.effectType }) {
+            removeStatusEffect(entry)
+        }
     }
 }

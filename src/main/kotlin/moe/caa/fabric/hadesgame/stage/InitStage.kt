@@ -7,8 +7,6 @@ import moe.caa.fabric.hadesgame.event.networkHelloEvent
 import moe.caa.fabric.hadesgame.util.Location
 import moe.caa.fabric.hadesgame.util.broadcastOverlay
 import moe.caa.fabric.hadesgame.util.randomLobbySpawnLocation
-import moe.caa.fabric.hadesgame.util.teleport
-import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents
 import net.minecraft.block.BlockState
 import net.minecraft.block.Blocks
 import net.minecraft.text.Text
@@ -32,12 +30,6 @@ data object InitStage : AbstractStage() {
                 )
             }
             return@register OnHello.Result.ALLOWED
-        }
-
-        ServerPlayerEvents.JOIN.register {
-            if (isCurrentRunStage()) {
-                it.teleport(lobbySpawnLoc)
-            }
         }
     }
 

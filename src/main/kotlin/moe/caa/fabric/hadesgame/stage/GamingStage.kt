@@ -1,13 +1,7 @@
 package moe.caa.fabric.hadesgame.stage
 
-import moe.caa.fabric.hadesgame.access.LivingEntityAccess
-import moe.caa.fabric.hadesgame.event.preDeathEvent
 import moe.caa.fabric.hadesgame.handler.ScoreboardHandler
 import moe.caa.fabric.hadesgame.util.*
-import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
-import net.minecraft.entity.LivingEntity
-import net.minecraft.entity.damage.DamageSource
-import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.sound.SoundEvents
 import net.minecraft.text.Text
 import net.minecraft.world.GameMode
@@ -19,34 +13,14 @@ data object GamingStage : AbstractStage() {
     override val nextStage: AbstractStage = EndStage
 
     private var tick = 0
-    private var invincibleCountdown = 0
+    var invincibleCountdown = 0
 
-    override fun init() {
-        ServerLivingEntityEvents.ALLOW_DAMAGE.register { livingEntity, _, _ ->
-            if (isCurrentRunStage()) {
-                if (livingEntity is ServerPlayerEntity) {
-                    return@register invincibleCountdown <= 0
-                }
-            }
-            return@register true
-        }
-
-        preDeathEvent.register { livingEntity: LivingEntity, damageSource: DamageSource ->
-            if (isCurrentRunStage() && livingEntity is ServerPlayerEntity) {
-                (livingEntity as LivingEntityAccess).`hadesGame$callDrop`(livingEntity.world, damageSource)
-                livingEntity.resetState()
-                livingEntity.changeGameMode(GameMode.SPECTATOR)
-                livingEntity.damageTracker.deathMessage.broadcast()
-
-                return@register true
-            }
-            return@register false
-        }
-    }
+    var winner: Text? = null
 
     override suspend fun startStage() {
         tick = 0
         invincibleCountdown = 20
+        winner = null
 
         for (player in getPlayers()) {
             player.resetState()
@@ -78,7 +52,7 @@ data object GamingStage : AbstractStage() {
                     .append(Text.literal(" 秒").withColor(Color.LIGHT_GRAY.rgb)).broadcastOverlay()
             } else if (invincibleCountdown == 0) {
                 SoundEvents.GOAT_HORN_SOUNDS[2].value().broadcast(1000F, 1F)
-                Text.literal("全军出击!").withColor(Color.RED.rgb).broadcastOverlay()
+                Text.literal("鲨了他们!").withColor(Color.RED.rgb).broadcastOverlay()
 
             } else {
                 ScoreboardHandler.updateContents(contents = buildList {
@@ -93,7 +67,16 @@ data object GamingStage : AbstractStage() {
     }
 
     override suspend fun shouldEndStage(): Boolean {
-        val playerEntities = getPlayers().filter { it.gameMode != GameMode.SPECTATOR }
-        return playerEntities.size <= 1
+        if (tick % 20 == 0) {
+            val playerEntities = getPlayers().filter { it.gameMode != GameMode.SPECTATOR }
+            if (playerEntities.size <= 1) {
+                if (playerEntities.isNotEmpty()) {
+                    winner = playerEntities.first().name
+                }
+                return true
+            }
+        }
+
+        return false
     }
 }
