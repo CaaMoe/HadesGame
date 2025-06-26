@@ -116,19 +116,21 @@ data object GamingStage : AbstractStage() {
                     add(Text.literal(" "))
                     add(Text.literal(" 下一事件:"))
 
+                    fun Int.countdownFormat() = String.format("%02d:%02d", this / 60, this % 60)
+
                     if(eventCountdown > 10){
                         add(
                             Text.literal("   ")
                                 .append(Text.literal(if(codType.hideEventName) "§kHadesGame" else event.eventName).withColor(Color.GREEN.rgb))
                                 .append(Text.literal("  ").withColor(Color.GREEN.rgb))
-                                .append(Text.literal(if(codType.hideCountdown) "§k00:10" else String.format("%02d:%02d", eventCountdown / 60, eventCountdown % 60)).withColor(Color.LIGHT_GRAY.rgb))
+                                .append(Text.literal(if(codType.hideCountdown) "§k00:10" else eventCountdown.countdownFormat()).withColor(Color.LIGHT_GRAY.rgb))
                         )
                     } else {
                         add(
                             Text.literal("   ")
                                 .append(Text.literal(event.eventName).withColor(Color.GREEN.rgb))
                                 .append(Text.literal("  ").withColor(Color.GREEN.rgb))
-                                .append(Text.literal(String.format("%02d:%02d", eventCountdown / 60, eventCountdown % 60)).withColor(Color.LIGHT_GRAY.rgb))
+                                .append(Text.literal(eventCountdown.countdownFormat()).withColor(Color.LIGHT_GRAY.rgb))
                         )
                     }
                     add(Text.literal(" "))
