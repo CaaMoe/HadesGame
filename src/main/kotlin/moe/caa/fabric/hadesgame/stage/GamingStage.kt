@@ -26,16 +26,27 @@ data object GamingStage : AbstractStage() {
     private var event = AbstractGameEvent::class.sealedSubclasses.map { it.objectInstance!! }.random()
 
     enum class CodType {
-        ALL,
-        COUNTDOWN,
-        NAME
+        ALL {
+            override val hideEventName = true
+            override val hideCountdown = true
+        },
+        COUNTDOWN {
+            override val hideEventName = false
+            override val hideCountdown = true
+        },
+        NAME {
+            override val hideEventName = true
+            override val hideCountdown = false
+        };
+
+        abstract val hideEventName: Boolean
+        abstract val hideCountdown: Boolean
     }
 
     private fun randomNext() {
         eventCountdown = eventCountdownRange.random()
         codType = CodType.entries.toTypedArray().random()
         event = AbstractGameEvent::class.sealedSubclasses.map { it.objectInstance!! }.random()
-
     }
 
     override suspend fun startStage() {
@@ -104,12 +115,22 @@ data object GamingStage : AbstractStage() {
                     add(Text.literal(DATE_FORMAT.format(LocalDateTime.now())).withColor(Color.LIGHT_GRAY.rgb))
                     add(Text.literal(" "))
                     add(Text.literal(" 下一事件:"))
-                    add(
-                        Text.literal("   ")
-                            .append(Text.literal("§k交换位置").withColor(Color.GREEN.rgb))
-                            .append(Text.literal("  ").withColor(Color.GREEN.rgb))
-                            .append(Text.literal("§k00:15").withColor(Color.LIGHT_GRAY.rgb))
-                    )
+
+                    if(eventCountdown > 10){
+                        add(
+                            Text.literal("   ")
+                                .append(Text.literal(if(codType.hideEventName) "§kHadesGame" else event.eventName).withColor(Color.GREEN.rgb))
+                                .append(Text.literal("  ").withColor(Color.GREEN.rgb))
+                                .append(Text.literal(if(codType.hideCountdown) "§k00:10" else String.format("%02d:%02d", eventCountdown / 60, eventCountdown % 60)).withColor(Color.LIGHT_GRAY.rgb))
+                        )
+                    } else {
+                        add(
+                            Text.literal("   ")
+                                .append(Text.literal(event.eventName).withColor(Color.GREEN.rgb))
+                                .append(Text.literal("  ").withColor(Color.GREEN.rgb))
+                                .append(Text.literal(String.format("%02d:%02d", eventCountdown / 60, eventCountdown % 60)).withColor(Color.LIGHT_GRAY.rgb))
+                        )
+                    }
                     add(Text.literal(" "))
                     add(
                         Text.literal(" 边界: ").append(
