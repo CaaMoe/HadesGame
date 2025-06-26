@@ -125,7 +125,7 @@ data object GamingStage : AbstractStage() {
                         add(
                             Text.literal("   ")
                                 .append(
-                                    Text.literal(if (codType.hideEventName) "§kHadesGame" else event.eventName)
+                                    Text.literal(if (codType.hideEventName) "§kCaaMoe" else event.eventName)
                                         .withColor(Color.GREEN.rgb)
                                 )
                                 .append(Text.literal("  ").withColor(Color.GREEN.rgb))
