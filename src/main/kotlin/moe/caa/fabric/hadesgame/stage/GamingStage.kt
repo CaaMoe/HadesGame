@@ -93,7 +93,7 @@ data object GamingStage : AbstractStage() {
                         Text.literal(" 存活: ")
                             .append(
                                 Text.literal(getPlayers().filter { it.gameMode != GameMode.SPECTATOR }.size.toString())
-                                .withColor(Color.RED.rgb)
+                                    .withColor(Color.RED.rgb)
                             )
                     )
 
@@ -109,8 +109,11 @@ data object GamingStage : AbstractStage() {
                 Text.literal("鲨了他们!").withColor(Color.RED.rgb).broadcastOverlay()
                 randomNext()
             } else {
-
-                // todo 未完成
+                eventCountdown--
+                if (eventCountdown <= 0) {
+                    event.callEvent()
+                    randomNext()
+                }
                 ScoreboardHandler.updateContents(contents = buildList {
                     add(Text.literal(DATE_FORMAT.format(LocalDateTime.now())).withColor(Color.LIGHT_GRAY.rgb))
                     add(Text.literal(" "))
@@ -118,12 +121,18 @@ data object GamingStage : AbstractStage() {
 
                     fun Int.countdownFormat() = String.format("%02d:%02d", this / 60, this % 60)
 
-                    if(eventCountdown > 10){
+                    if (eventCountdown > 10) {
                         add(
                             Text.literal("   ")
-                                .append(Text.literal(if(codType.hideEventName) "§kHadesGame" else event.eventName).withColor(Color.GREEN.rgb))
+                                .append(
+                                    Text.literal(if (codType.hideEventName) "§kHadesGame" else event.eventName)
+                                        .withColor(Color.GREEN.rgb)
+                                )
                                 .append(Text.literal("  ").withColor(Color.GREEN.rgb))
-                                .append(Text.literal(if(codType.hideCountdown) "§k00:10" else eventCountdown.countdownFormat()).withColor(Color.LIGHT_GRAY.rgb))
+                                .append(
+                                    Text.literal(if (codType.hideCountdown) "§k00:10" else eventCountdown.countdownFormat())
+                                        .withColor(Color.LIGHT_GRAY.rgb)
+                                )
                         )
                     } else {
                         add(
@@ -144,7 +153,7 @@ data object GamingStage : AbstractStage() {
                         Text.literal(" 存活: ")
                             .append(
                                 Text.literal(getPlayers().filter { it.gameMode != GameMode.SPECTATOR }.size.toString())
-                                .withColor(Color.RED.rgb)
+                                    .withColor(Color.RED.rgb)
                             )
                     )
                     add(Text.literal(" "))
