@@ -2,6 +2,7 @@ package moe.caa.fabric.hadesgame.handler
 
 import moe.caa.fabric.hadesgame.GameCore
 import moe.caa.fabric.hadesgame.event.preDeathEvent
+import moe.caa.fabric.hadesgame.mixin.LivingEntityAccessor
 import moe.caa.fabric.hadesgame.stage.EndStage
 import moe.caa.fabric.hadesgame.stage.GamingStage
 import moe.caa.fabric.hadesgame.stage.InitStage
@@ -37,16 +38,21 @@ object DeathHandler {
 
         preDeathEvent.register { livingEntity: LivingEntity, damageSource: DamageSource ->
             if (livingEntity !is ServerPlayerEntity) return@register false
+            livingEntity as LivingEntityAccessor
 
-            livingEntity.resetState()
-            livingEntity.damageTracker.deathMessage.broadcast()
             when (GameCore.currentStage) {
-                EndStage, GamingStage -> livingEntity.changeGameMode(GameMode.SPECTATOR)
+                EndStage, GamingStage -> {
+                    livingEntity.changeGameMode(GameMode.SPECTATOR)
+                    livingEntity.invokeDrop(livingEntity.world, damageSource)
+                }
+
                 InitStage, WaitReadyStage -> {
                     livingEntity.changeGameMode(GameMode.ADVENTURE)
                     livingEntity.teleport(InitStage.lobbySpawnLoc)
                 }
             }
+            livingEntity.resetState()
+            livingEntity.damageTracker.deathMessage.broadcast()
 
             return@register true
         }

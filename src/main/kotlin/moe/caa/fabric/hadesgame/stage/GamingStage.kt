@@ -68,6 +68,12 @@ data object GamingStage : AbstractStage() {
     override suspend fun tickStage() {
         tick++
 
+        if (invincibleCountdown < 0 && eventCountdown <= 2) {
+            if (tick % 2 == 0) {
+                SoundEvents.BLOCK_NOTE_BLOCK_BIT.value().broadcast(1000F, 2.0F)
+            }
+        }
+
         if (tick % 20 == 0) {
             invincibleCountdown--
 
