@@ -15,16 +15,16 @@ data object SwapLocation : AbstractGameEvent() {
             .toMutableList()
             .apply { shuffle() }
 
-        val posList = players.map { it.name to it.getLocation() }.toMutableList().apply {
+        val list = players.map { it.name to it.getLocation() }.toMutableList().apply {
             add(removeFirst())
         }
 
         players.forEach {
-            val (name, pos) = posList.removeFirst()
+            val (name, pos) = list.removeFirst()
             it.teleport(pos)
             Text.literal("你被传送到 ").withColor(Color.LIGHT_GRAY.rgb)
                 .append(Text.literal(name.literalString).withColor(Color.WHITE.rgb)).append(" 的位置").sendOverlay(it)
         }
-        SoundEvents.ENTITY_ENDERMAN_TELEPORT.broadcast(100F, 0F)
+        SoundEvents.ENTITY_FOX_TELEPORT.broadcast(100F, 0F)
     }
 }
