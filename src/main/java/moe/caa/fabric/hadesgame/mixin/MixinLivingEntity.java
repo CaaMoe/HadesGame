@@ -1,5 +1,7 @@
 package moe.caa.fabric.hadesgame.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import moe.caa.fabric.hadesgame.access.LivingEntityAccess;
 import moe.caa.fabric.hadesgame.event.OnPreDeath;
 import net.minecraft.entity.LivingEntity;
@@ -21,8 +23,8 @@ public abstract class MixinLivingEntity implements LivingEntityAccess {
         drop(world, damageSource);
     }
 
-    @Redirect(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;onDeath(Lnet/minecraft/entity/damage/DamageSource;)V"))
-    void onRedirectDamage(LivingEntity instance, DamageSource damageSource) {
+    @WrapOperation(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;onDeath(Lnet/minecraft/entity/damage/DamageSource;)V"))
+    void onRedirectDamage(LivingEntity instance, DamageSource damageSource, Operation<Void> original) {
         if (OnPreDeath.Companion.shouldCancel(instance, damageSource)) {
             return;
         }
