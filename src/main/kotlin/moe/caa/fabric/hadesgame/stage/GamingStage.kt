@@ -59,10 +59,11 @@ data object GamingStage : AbstractStage() {
             player.changeGameMode(GameMode.SURVIVAL)
         }
 
-        val border = GameCore.server.overworld.worldBorder
-        border.size = 900.0
-
-        border.interpolateSize(900.0, 1.0, 1000 * 60 * 15)
+        for (world in GameCore.server.worlds) {
+            val border = world.worldBorder
+            border.size = 900.0
+            border.interpolateSize(900.0, 1.0, 1000 * 60 * 15)
+        }
     }
 
     override suspend fun tickStage() {

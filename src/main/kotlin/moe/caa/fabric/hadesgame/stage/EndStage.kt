@@ -1,9 +1,11 @@
 package moe.caa.fabric.hadesgame.stage
 
+import moe.caa.fabric.hadesgame.GameCore
 import moe.caa.fabric.hadesgame.handler.ScoreboardHandler
 import moe.caa.fabric.hadesgame.util.DATE_FORMAT
 import moe.caa.fabric.hadesgame.util.broadcast
 import moe.caa.fabric.hadesgame.util.broadcastOverlay
+import net.minecraft.entity.Entity
 import net.minecraft.sound.SoundEvents
 import net.minecraft.text.Text
 import java.awt.Color
@@ -20,6 +22,12 @@ data object EndStage : AbstractStage() {
     override suspend fun startStage() {
         tick = 0
         countdown = 15
+
+        for (world in GameCore.server.worlds) {
+            for (entity in world.iterateEntities()) {
+                entity.remove(Entity.RemovalReason.KILLED)
+            }
+        }
 
         SoundEvents.GOAT_HORN_SOUNDS[1].value().broadcast(1000F, 1F)
 
