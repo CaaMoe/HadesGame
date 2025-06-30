@@ -28,6 +28,6 @@ data object InvertStatus : AbstractGameEvent() {
 
             Text.literal("你的血量与饥饿值已反转").withColor(Color.LIGHT_GRAY.rgb).sendOverlay(player)
         }
-        SoundEvents.ENTITY_WITCH_DRINK.broadcast(1.0F, 1.0F)
+        SoundEvents.ENTITY_FOX_TELEPORT.broadcast(100F, 0F)
     }
 }
