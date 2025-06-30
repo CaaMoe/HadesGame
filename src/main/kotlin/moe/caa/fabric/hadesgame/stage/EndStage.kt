@@ -6,6 +6,7 @@ import moe.caa.fabric.hadesgame.util.DATE_FORMAT
 import moe.caa.fabric.hadesgame.util.broadcast
 import moe.caa.fabric.hadesgame.util.broadcastOverlay
 import net.minecraft.entity.Entity
+import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.sound.SoundEvents
 import net.minecraft.text.Text
 import java.awt.Color
@@ -25,7 +26,9 @@ data object EndStage : AbstractStage() {
 
         for (world in GameCore.server.worlds) {
             for (entity in world.iterateEntities()) {
-                entity.remove(Entity.RemovalReason.KILLED)
+                if(entity !is ServerPlayerEntity){
+                    entity?.remove(Entity.RemovalReason.KILLED)
+                }
             }
         }
 

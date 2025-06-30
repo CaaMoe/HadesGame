@@ -18,28 +18,11 @@ import net.minecraft.world.GameMode
 
 object DeathHandler {
     fun setup() {
-        ServerLivingEntityEvents.ALLOW_DEATH.register { livingEntity, _, _ ->
+        ServerLivingEntityEvents.ALLOW_DEATH.register { livingEntity, damageSource, _ ->
             if (livingEntity !is ServerPlayerEntity) return@register true
-
-            livingEntity.resetState()
-            when (GameCore.currentStage) {
-                EndStage, GamingStage -> {
-                    livingEntity.changeGameMode(GameMode.SPECTATOR)
-                }
-
-                InitStage, WaitReadyStage -> {
-                    livingEntity.changeGameMode(GameMode.ADVENTURE)
-                    livingEntity.teleport(InitStage.lobbySpawnLoc)
-                }
-            }
-
-            return@register false
-        }
-
-        preDeathEvent.register { livingEntity: LivingEntity, damageSource: DamageSource ->
-            if (livingEntity !is ServerPlayerEntity) return@register false
             livingEntity as LivingEntityAccessor
 
+            livingEntity.resetState()
             when (GameCore.currentStage) {
                 EndStage, GamingStage -> {
                     livingEntity.changeGameMode(GameMode.SPECTATOR)
@@ -51,8 +34,15 @@ object DeathHandler {
                     livingEntity.teleport(InitStage.lobbySpawnLoc)
                 }
             }
-            livingEntity.resetState()
+
             livingEntity.damageTracker.deathMessage.broadcast()
+
+            return@register false
+        }
+
+        preDeathEvent.register { livingEntity: LivingEntity, damageSource: DamageSource ->
+            if (livingEntity !is ServerPlayerEntity) return@register false
+            livingEntity.resetState()
 
             return@register true
         }
