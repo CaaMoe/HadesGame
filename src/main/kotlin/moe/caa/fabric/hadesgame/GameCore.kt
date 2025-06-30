@@ -37,7 +37,7 @@ object GameCore {
         coroutineScope.launch {
             currentStage.startStage()
             delay(50)
-            while (true) {
+            while (isActive) {
                 runCatching {
                     val startTimeMills = System.currentTimeMillis()
                     tickInPrimaryThread()
@@ -45,6 +45,7 @@ object GameCore {
                     val keepTimeMills = endTimeMills - startTimeMills
                     delay(max(0, 50 - keepTimeMills))
                 }.onFailure {
+                    if (it is CancellationException) throw it
                     logger.error("game loop error", it)
                 }
             }
