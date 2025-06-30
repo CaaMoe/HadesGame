@@ -42,17 +42,15 @@ data object InitStage : AbstractStage() {
     override suspend fun tickStage() {
         GameCore.logger.info("开始随机地图位置...")
         val tipJob = GameCore.coroutineScope.launch {
-            withContext(Dispatchers.IO) {
-                var second = 0
-                while (isActive) {
-                    second++
-                    var tip = Text.literal("随机地图中").withColor(Color.LIGHT_GRAY.rgb)
-                    repeat(second % 5 + 1) {
-                        tip = tip.append(Text.literal(".").withColor(Color.LIGHT_GRAY.rgb))
-                    }
-                    tip.broadcastOverlay()
-                    delay(500)
+            var second = 0
+            while (isActive) {
+                second++
+                var tip = Text.literal("随机地图中").withColor(Color.LIGHT_GRAY.rgb)
+                repeat(second % 5 + 1) {
+                    tip = tip.append(Text.literal(".").withColor(Color.LIGHT_GRAY.rgb))
                 }
+                tip.broadcastOverlay()
+                delay(500)
             }
         }
 
