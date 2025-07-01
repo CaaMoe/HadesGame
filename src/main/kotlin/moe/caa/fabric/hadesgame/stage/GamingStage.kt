@@ -119,7 +119,7 @@ data object GamingStage : AbstractStage() {
             } else {
                 eventCountdown--
                 if (eventCountdown <= 0) {
-                    if (Random.nextBoolean()) {
+                    if (Random.nextDouble() > 0.7) {
                         event.callEvent()
                     } else {
                         Text.literal("FAKE EVENT").withColor(Color.RED.rgb).broadcastOverlay()

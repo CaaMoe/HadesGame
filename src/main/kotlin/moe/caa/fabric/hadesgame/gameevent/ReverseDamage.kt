@@ -14,7 +14,7 @@ import net.minecraft.sound.SoundEvents
 import net.minecraft.text.Text
 import java.awt.Color
 
-class ReverseDamage : AbstractGameEvent() {
+data object ReverseDamage : AbstractGameEvent() {
     override val eventName = "反向伤害"
 
     private var activeJob: Job? = null
