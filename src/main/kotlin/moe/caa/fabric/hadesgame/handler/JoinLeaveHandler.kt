@@ -12,7 +12,7 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents
 import net.minecraft.entity.Entity
 import net.minecraft.world.GameMode
 
-object JoinHandler {
+object JoinLeaveHandler {
     fun setup() {
 
         ServerPlayerEvents.JOIN.register {
@@ -38,6 +38,13 @@ object JoinHandler {
                 InitStage, WaitReadyStage -> {
                     player.changeGameMode(GameMode.ADVENTURE)
                 }
+            }
+        }
+
+        ServerPlayerEvents.LEAVE.register {
+            when (GameCore.currentStage) {
+                GamingStage -> it.kill(it.world)
+                else -> {}
             }
         }
     }

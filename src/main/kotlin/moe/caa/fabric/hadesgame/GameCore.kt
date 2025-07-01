@@ -4,7 +4,7 @@ import kotlinx.coroutines.*
 import moe.caa.fabric.hadesgame.gameevent.AbstractGameEvent
 import moe.caa.fabric.hadesgame.handler.AllowDamageHandler
 import moe.caa.fabric.hadesgame.handler.DeathHandler
-import moe.caa.fabric.hadesgame.handler.JoinHandler
+import moe.caa.fabric.hadesgame.handler.JoinLeaveHandler
 import moe.caa.fabric.hadesgame.handler.ScoreboardHandler
 import moe.caa.fabric.hadesgame.stage.AbstractStage
 import moe.caa.fabric.hadesgame.stage.InitStage
@@ -30,7 +30,7 @@ object GameCore {
 
         ScoreboardHandler.setup()
         AllowDamageHandler.setup()
-        JoinHandler.setup()
+        JoinLeaveHandler.setup()
         DeathHandler.setup()
 
         AbstractStage::class.sealedSubclasses.map { it.objectInstance!! }.forEach { it.initStage() }
