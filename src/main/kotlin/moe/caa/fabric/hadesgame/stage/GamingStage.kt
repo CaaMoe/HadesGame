@@ -9,12 +9,13 @@ import net.minecraft.text.Text
 import net.minecraft.world.GameMode
 import java.awt.Color
 import java.time.LocalDateTime
+import kotlin.random.Random
 
 data object GamingStage : AbstractStage() {
     override val stageName: String = "游戏中"
     override val nextStage: AbstractStage = EndStage
 
-    private var eventCountdownRange = 30..90
+    private var eventCountdownRange = 20..70
 
     private var tick = 0
     var invincibleCountdown = 0
@@ -61,8 +62,8 @@ data object GamingStage : AbstractStage() {
 
         for (world in GameCore.server.worlds) {
             val border = world.worldBorder
-            border.size = 900.0
-            border.interpolateSize(900.0, 1.0, 1000 * 60 * 15)
+            border.size = 1000.0
+            border.interpolateSize(900.0, 3.0, 1000 * 60 * 10)
         }
     }
 
@@ -118,7 +119,12 @@ data object GamingStage : AbstractStage() {
             } else {
                 eventCountdown--
                 if (eventCountdown <= 0) {
-                    event.callEvent()
+                    if (Random.nextBoolean()) {
+                        event.callEvent()
+                    } else {
+                        Text.literal("FAKE EVENT").withColor(Color.RED.rgb).broadcastOverlay()
+                        SoundEvents.BLOCK_NOTE_BLOCK_DIDGERIDOO.value().broadcast(1000F, 1.5F)
+                    }
                     randomNext()
                 }
                 ScoreboardHandler.updateContents(contents = buildList {
