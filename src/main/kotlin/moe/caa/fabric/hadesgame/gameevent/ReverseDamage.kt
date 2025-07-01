@@ -49,7 +49,8 @@ data object ReverseDamage : AbstractGameEvent() {
             SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP.broadcast(1F, 1F)
         }
         Text.literal("反向伤害效果已生效").withColor(Color.GREEN.rgb).broadcastOverlay()
-        SoundEvents.UI_TOAST_CHALLENGE_COMPLETE.broadcast(1F, 1F)
+
+        SoundEvents.BLOCK_NOTE_BLOCK_PLING.value().broadcast(1F, 1F)
     }
 
     override suspend fun endEvent() {
