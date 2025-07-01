@@ -10,7 +10,9 @@ import moe.caa.fabric.hadesgame.util.resetState
 import moe.caa.fabric.hadesgame.util.teleport
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents
 import net.minecraft.entity.Entity
+import net.minecraft.text.Text
 import net.minecraft.world.GameMode
+import java.awt.Color
 
 object JoinLeaveHandler {
     fun setup() {
@@ -43,7 +45,12 @@ object JoinLeaveHandler {
 
         ServerPlayerEvents.LEAVE.register {
             when (GameCore.currentStage) {
-                GamingStage -> it.kill(it.world)
+                GamingStage -> {
+                    it.kill(it.world)
+                    Text.literal("玩家 ").withColor(Color.LIGHT_GRAY.rgb)
+                        .append(Text.literal(it.name.literalString).withColor(Color.WHITE.rgb))
+                        .append(Text.literal(" 畏战自鲨了...").withColor(Color.LIGHT_GRAY.rgb))
+                }
                 else -> {}
             }
         }
