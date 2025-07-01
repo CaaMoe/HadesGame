@@ -9,4 +9,7 @@ public interface EntityAccessor {
 
     @Invoker("setFlag")
     void invokeSetFlag(int mask, boolean value);
+
+    @Invoker("getFlag")
+    boolean invokeGetFlag(int mask);
 }
