@@ -27,7 +27,7 @@ fun interface OnPreDeath {
     fun onPreDeath(livingEntity: LivingEntity, damageSource: DamageSource): Boolean
 
     companion object {
-        fun shouldCancel(livingEntity: LivingEntity, damageSource: DamageSource): Boolean {
+        fun shouldContinue(livingEntity: LivingEntity, damageSource: DamageSource): Boolean {
             return preDeathEvent.invoker().onPreDeath(livingEntity, damageSource)
         }
     }

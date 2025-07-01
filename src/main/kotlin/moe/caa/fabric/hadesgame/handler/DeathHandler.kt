@@ -41,10 +41,10 @@ object DeathHandler {
         }
 
         preDeathEvent.register { livingEntity: LivingEntity, damageSource: DamageSource ->
-            if (livingEntity !is ServerPlayerEntity) return@register false
+            if (livingEntity !is ServerPlayerEntity) return@register true
             livingEntity.resetState()
 
-            return@register true
+            return@register false
         }
     }
 }
