@@ -9,6 +9,7 @@ import moe.caa.fabric.hadesgame.util.broadcastOverlay
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
 import net.minecraft.entity.Entity
 import net.minecraft.entity.LivingEntity
+import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.sound.SoundEvents
 import net.minecraft.text.Text
@@ -30,7 +31,13 @@ data object ReverseDamage : AbstractGameEvent() {
             if (activeJob?.isActive == true) {
                 handlingEntity.add(entity)
                 handlingEntity.add(attacker)
-                attacker.damage((entity.world as ServerWorld), entity.world.damageSources.generic(), amount)
+                attacker.damage((entity.world as ServerWorld),
+                    if(attacker is PlayerEntity)
+                        entity.world.damageSources.playerAttack(attacker)
+                    else
+                        entity.world.damageSources.mobAttack(attacker),
+                    amount
+                )
                 handlingEntity.remove(entity)
                 handlingEntity.remove(attacker)
                 return@register false
