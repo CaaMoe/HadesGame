@@ -7,8 +7,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(LivingEntity.class)
-public interface LivingEntityAccessor {
+public interface LivingEntityAccessor extends EntityAccessor {
 
     @Invoker("drop")
     void invokeDrop(ServerWorld world, DamageSource damageSource);
+
+    @Invoker("setLivingFlag")
+    void invokeSetLivingFlag(int mask, boolean value);
 }

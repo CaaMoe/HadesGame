@@ -4,6 +4,7 @@
   "package": "moe.caa.fabric.hadesgame.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "EntityAccessor",
     "LivingEntityAccessor",
     "MixinEntity",
     "MixinLivingEntity",
