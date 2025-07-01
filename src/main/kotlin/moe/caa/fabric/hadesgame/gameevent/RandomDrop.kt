@@ -36,7 +36,7 @@ data object RandomDrop : AbstractGameEvent() {
 
     override suspend fun callEvent() {
         activeJob?.cancel()
-        
+
         activeJob = GameCore.coroutineScope.launch {
             // 30 秒
             delay(1000 * 30)
