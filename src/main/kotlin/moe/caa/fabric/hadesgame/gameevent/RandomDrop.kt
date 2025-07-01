@@ -41,9 +41,9 @@ data object RandomDrop : AbstractGameEvent() {
             // 30 秒
             delay(1000 * 30)
             Text.literal("随机掉落效果已失效").withColor(Color.RED.rgb).broadcastOverlay()
+            SoundEvents.ENTITY_VILLAGER_NO.broadcast(100F, 0F)
         }
         Text.literal("随机掉落效果已生效").withColor(Color.GREEN.rgb).broadcastOverlay()
-
         SoundEvents.ENTITY_ITEM_PICKUP.broadcast(100F, 0F)
     }
 
