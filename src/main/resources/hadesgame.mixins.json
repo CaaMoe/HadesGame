@@ -9,7 +9,8 @@
     "MixinMinecraftDedicatedServer",
     "MixinServerCommandSource",
     "MixinServerLoginNetworkHandler",
-    "MixinServerPlayNetworkHandler"
+    "MixinServerPlayNetworkHandler",
+    "MixinServerWorld"
   ],
   "client": [
   ],

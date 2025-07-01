@@ -26,7 +26,7 @@ data object EndStage : AbstractStage() {
 
         for (world in GameCore.server.worlds) {
             for (entity in world.iterateEntities()) {
-                if(entity !is ServerPlayerEntity){
+                if (entity !is ServerPlayerEntity) {
                     entity?.remove(Entity.RemovalReason.KILLED)
                 }
             }

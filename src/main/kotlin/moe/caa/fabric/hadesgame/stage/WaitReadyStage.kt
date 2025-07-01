@@ -51,7 +51,7 @@ data object WaitReadyStage : AbstractStage() {
     val preparedPlayers = mutableSetOf<UUID>()
     private val changeStateCacheMap = WeakHashMap<UUID, Long>()
 
-    override fun init() {
+    override fun initStage() {
         sneakStateChangeEvent.register { player, newSneakingState ->
             if (isCurrentRunStage()) {
                 if (newSneakingState) {

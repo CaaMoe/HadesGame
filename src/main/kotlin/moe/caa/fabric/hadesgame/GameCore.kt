@@ -1,6 +1,7 @@
 package moe.caa.fabric.hadesgame
 
 import kotlinx.coroutines.*
+import moe.caa.fabric.hadesgame.gameevent.AbstractGameEvent
 import moe.caa.fabric.hadesgame.handler.AllowDamageHandler
 import moe.caa.fabric.hadesgame.handler.DeathHandler
 import moe.caa.fabric.hadesgame.handler.JoinHandler
@@ -32,7 +33,9 @@ object GameCore {
         JoinHandler.setup()
         DeathHandler.setup()
 
-        AbstractStage::class.sealedSubclasses.map { it.objectInstance!! }.forEach { it.init() }
+        AbstractStage::class.sealedSubclasses.map { it.objectInstance!! }.forEach { it.initStage() }
+        AbstractGameEvent::class.sealedSubclasses.map { it.objectInstance!! }.forEach { it.initEvent() }
+
 
         coroutineScope.launch {
             currentStage.startStage()

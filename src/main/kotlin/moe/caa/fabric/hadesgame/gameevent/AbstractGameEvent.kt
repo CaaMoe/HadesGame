@@ -7,6 +7,9 @@ sealed class AbstractGameEvent {
     // 事件名称
     abstract val eventName: String
 
+    // 事件初始化调用, 全局只会调用一次
+    open fun initEvent() {}
+
     // 游戏事件触发时执行
     abstract suspend fun callEvent()
 

@@ -8,7 +8,7 @@ sealed class AbstractStage {
     abstract val stageName: String
 
     // 初始化
-    open fun init() {}
+    open fun initStage() {}
 
     // 开始阶段
     open suspend fun startStage() {}

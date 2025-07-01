@@ -1,6 +1,8 @@
 package moe.caa.fabric.hadesgame.stage
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import moe.caa.fabric.hadesgame.GameCore
 import moe.caa.fabric.hadesgame.event.OnHello
 import moe.caa.fabric.hadesgame.event.networkHelloEvent
@@ -22,7 +24,7 @@ data object InitStage : AbstractStage() {
     override val nextStage = WaitReadyStage
     override suspend fun shouldEndStage() = true
 
-    override fun init() {
+    override fun initStage() {
         networkHelloEvent.register {
             if (runCatching { lobbySpawnLoc }.getOrNull() == null) {
                 return@register OnHello.Result.KICK(
