@@ -63,7 +63,7 @@ data object GamingStage : AbstractStage() {
         for (world in GameCore.server.worlds) {
             val border = world.worldBorder
             border.size = 1000.0
-            border.interpolateSize(900.0, 3.0, 1000 * 60 * 10)
+            border.interpolateSize(1000.0, 3.0, 1000 * 60 * 10)
         }
     }
 
@@ -119,7 +119,7 @@ data object GamingStage : AbstractStage() {
             } else {
                 eventCountdown--
                 if (eventCountdown <= 0) {
-                    if (Random.nextDouble() > 0.7) {
+                    if (Random.nextDouble() < 0.7) {
                         event.callEvent()
                     } else {
                         Text.literal("FAKE EVENT").withColor(Color.RED.rgb).broadcastOverlay()
