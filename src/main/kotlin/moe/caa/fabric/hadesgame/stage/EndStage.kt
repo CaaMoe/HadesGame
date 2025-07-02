@@ -24,10 +24,12 @@ data object EndStage : AbstractStage() {
         tick = 0
         countdown = 15
 
-        for (world in GameCore.server.worlds) {
-            for (entity in world.iterateEntities()) {
-                if (entity !is ServerPlayerEntity) {
-                    entity?.remove(Entity.RemovalReason.KILLED)
+        runCatching {
+            for (world in GameCore.server.worlds) {
+                for (entity in world.iterateEntities()) {
+                    if (entity !is ServerPlayerEntity) {
+                        entity?.remove(Entity.RemovalReason.KILLED)
+                    }
                 }
             }
         }
