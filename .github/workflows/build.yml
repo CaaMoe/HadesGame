@@ -1,0 +1,31 @@
+name: Java CI
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v3
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 21
+          cache: 'gradle'
+
+      - name: Build
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: current
+          arguments: build
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: Output
+          path: build/libs/*.jar
+          retention-days: 15
