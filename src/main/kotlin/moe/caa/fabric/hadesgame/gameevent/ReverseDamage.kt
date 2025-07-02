@@ -31,14 +31,7 @@ data object ReverseDamage : AbstractGameEvent() {
             if (activeJob?.isActive == true) {
                 handlingEntity.add(entity)
                 handlingEntity.add(attacker)
-                attacker.damage(
-                    (entity.world as ServerWorld),
-                    if (attacker is PlayerEntity)
-                        entity.world.damageSources.playerAttack(attacker)
-                    else
-                        entity.world.damageSources.mobAttack(attacker),
-                    amount
-                )
+                attacker.damage((entity.world as ServerWorld), entity.world.damageSources.thorns(attacker), amount)
                 handlingEntity.remove(entity)
                 handlingEntity.remove(attacker)
                 return@register false
