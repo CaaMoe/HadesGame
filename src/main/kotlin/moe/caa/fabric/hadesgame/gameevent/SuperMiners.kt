@@ -22,7 +22,7 @@ data object SuperMiners : AbstractGameEvent() {
 
         PlayerBlockBreakEvents.AFTER.register { world, player, pos, state, blockEntity ->
             if (activeJob?.isActive == true) {
-                val speech = 3
+                val speech = 2
                 for (y in pos.y - speech..<pos.y + speech) {
                     for (x in pos.x - speech..<pos.x + speech) {
                         for (z in pos.z - speech..<pos.z + speech) {
