@@ -63,7 +63,7 @@ data object GamingStage : AbstractStage() {
         for (world in GameCore.server.worlds) {
             val border = world.worldBorder
             border.size = 1000.0
-            border.interpolateSize(900.0, 3.0, 1000 * 60 * 10)
+            border.interpolateSize(1000.0, 3.0, 1000 * 60 * 10)
         }
     }
 
