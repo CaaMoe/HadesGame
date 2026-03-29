@@ -63,7 +63,7 @@ data object GamingStage : AbstractStage() {
         for (world in GameCore.server.allLevels) {
             val border = world.worldBorder
             border.size = 1000.0
-            border.lerpSizeBetween(1000.0, 3.0, 0L, 1000L * 60 * 10)
+            border.lerpSizeBetween(1000.0, 3.0, 20L * 60 * 10, 0L)
         }
     }
 

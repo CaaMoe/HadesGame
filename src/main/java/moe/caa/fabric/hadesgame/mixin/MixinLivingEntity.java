@@ -2,6 +2,7 @@ package moe.caa.fabric.hadesgame.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import moe.caa.fabric.hadesgame.event.OnEntityHeal;
 import moe.caa.fabric.hadesgame.event.OnEntityLivingFlagChange;
 import moe.caa.fabric.hadesgame.event.OnPreDeath;
 import net.minecraft.world.damagesource.DamageSource;
@@ -18,6 +19,13 @@ public abstract class MixinLivingEntity {
     private void onRedirectDamage(LivingEntity instance, DamageSource damageSource, Operation<Void> original) {
         if (OnPreDeath.Companion.shouldContinue(instance, damageSource)) {
             original.call(instance, damageSource);
+        }
+    }
+
+    @Inject(method = "heal", at = @At("HEAD"), cancellable = true)
+    private void onHeal(float amount, CallbackInfo ci) {
+        if (!OnEntityHeal.Companion.shouldContinue((LivingEntity) (Object) this, amount)) {
+            ci.cancel();
         }
     }
 
