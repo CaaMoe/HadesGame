@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "hadesgame",
+  "version": "${version}",
+  "name": "HadesGame",
+  "environment": "server",
+  "entrypoints": {
+    "server": [
+      {
+        "adapter": "kotlin",
+        "value": "moe.caa.fabric.hadesgame.main.HadesGame"
+      }
+    ]
+  },
+  "mixins": [
+    "hadesgame.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": "*",
+    "fabric-api": "*",
+    "fabric-language-kotlin": "*",
+    "minecraft": "26.3",
+    "java": ">=25"
+  }
+}
