@@ -31,6 +31,7 @@ sealed class AbstractSustainGameEvent : AbstractGameEvent() {
     var eventRunning = false
         private set
 
+    private val bossBarIdentifier = Identifier.fromNamespaceAndPath("hadesgame", javaClass.simpleName.lowercase())
     private var bossBar: CustomBossEvent? = null
 
     /**
@@ -111,7 +112,7 @@ sealed class AbstractSustainGameEvent : AbstractGameEvent() {
 
         bossBar = GameCore.server.customBossEvents.create(
             RandomSource.create(),
-            Identifier.withDefaultNamespace(javaClass.name.lowercase()),
+            bossBarIdentifier,
             Component.literal(name)
         ).apply {
             this.color = bossBarColor

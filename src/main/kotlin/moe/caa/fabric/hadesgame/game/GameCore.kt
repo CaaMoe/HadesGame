@@ -43,8 +43,13 @@ data object GameCore {
         DamageAndDeathHandler.init()
         JoinLeaveHandler.init()
 
+        // init stage
         AbstractStage::class.sealedSubclasses.forEach { it.objectInstance!! }
-        val gameEvents = AbstractGameEvent.fetchAllGameEvents()
+
+        // 清理bossBar
+        server.customBossEvents.ids.filter { it.namespace == "hadesgame" }.forEach {
+            server.customBossEvents.get(it)?.let { server.customBossEvents.remove(it) }
+        }
 
         logger.info("游戏加载完成, 正在初始化第一轮游戏.")
         startLoop()
