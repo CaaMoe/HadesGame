@@ -9,6 +9,7 @@ import java.awt.Color
 
 data object TickDown : AbstractSustainGameEvent() {
     override val name = "超级减速"
+    override val mutualExclusions = listOf(TickUp)
 
     override val startMessage = Message(
         Component.literal("超级减速效果已生效").withColor(Color.GREEN.rgb),
@@ -23,7 +24,6 @@ data object TickDown : AbstractSustainGameEvent() {
     )
 
     override fun eventStart() {
-        TickUp.shouldEnd()
         GameCore.server.tickRateManager().setTickRate(10F)
     }
 

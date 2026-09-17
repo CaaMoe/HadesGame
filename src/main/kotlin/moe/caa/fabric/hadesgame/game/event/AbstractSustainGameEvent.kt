@@ -34,6 +34,8 @@ sealed class AbstractSustainGameEvent : AbstractGameEvent() {
     private val bossBarIdentifier = Identifier.fromNamespaceAndPath("hadesgame", javaClass.simpleName.lowercase())
     private var bossBar: CustomBossEvent? = null
 
+    open val mutualExclusions = emptyList<AbstractSustainGameEvent>()
+
     /**
      * BossBar 的颜色.
      */
@@ -90,7 +92,7 @@ sealed class AbstractSustainGameEvent : AbstractGameEvent() {
         tickJob?.cancel()
     }
 
-    fun shouldEnd() {
+    private fun shouldEnd() {
         remainTicks = -1
         if (!eventRunning) return
         eventRunning = false
@@ -121,6 +123,9 @@ sealed class AbstractSustainGameEvent : AbstractGameEvent() {
                 this.addPlayer(it)
             }
         }
+
+        mutualExclusions.forEach { it.shouldEnd() }
+
         eventStart()
         startMessage.broadcast()
         GameCore.logger.info("事件 $name 已激活, 持续时间 $remainTicks ticks.")
