@@ -7,7 +7,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
 import java.awt.Color
 
-data object SustainTickDown : AbstractSustainGameEvent() {
+data object TickDown : AbstractSustainGameEvent() {
     override val name = "超级减速"
 
     override val startMessage = Message(
