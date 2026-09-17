@@ -90,7 +90,7 @@ sealed class AbstractSustainGameEvent : AbstractGameEvent() {
         tickJob?.cancel()
     }
 
-    private fun shouldEnd() {
+    fun shouldEnd() {
         remainTicks = -1
         if (!eventRunning) return
         eventRunning = false
@@ -129,10 +129,10 @@ sealed class AbstractSustainGameEvent : AbstractGameEvent() {
     /**
      * 持续型事件生效逻辑
      */
-    abstract fun eventStart()
+    open fun eventStart() {}
 
     /**
      * 持续型事件失效逻辑
      */
-    abstract fun eventEnd()
+    open fun eventEnd() {}
 }

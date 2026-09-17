@@ -47,12 +47,4 @@ data object ReverseDamage : AbstractSustainGameEvent() {
         Component.literal("伤害反转效果已失效").withColor(Color.RED.rgb),
         Sound(SoundEvents.CHAIN_BREAK, 1F, 0.5F)
     )
-
-    override fun eventStart() {
-
-    }
-
-    override fun eventEnd() {
-
-    }
 }

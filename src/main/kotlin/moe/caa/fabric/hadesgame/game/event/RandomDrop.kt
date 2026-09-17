@@ -37,12 +37,4 @@ data object RandomDrop : AbstractSustainGameEvent() {
         Component.literal("随机掉落效果已失效").withColor(Color.RED.rgb),
         Sound(SoundEvents.ITEM_PICKUP, 1F, 0F)
     )
-
-    override fun eventStart() {
-
-    }
-
-    override fun eventEnd() {
-
-    }
 }

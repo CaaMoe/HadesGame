@@ -1,7 +1,6 @@
 package moe.caa.fabric.hadesgame.game
 
 import kotlinx.coroutines.*
-import moe.caa.fabric.hadesgame.game.event.AbstractGameEvent
 import moe.caa.fabric.hadesgame.game.handler.CommandHandler
 import moe.caa.fabric.hadesgame.game.handler.DamageAndDeathHandler
 import moe.caa.fabric.hadesgame.game.handler.JoinLeaveHandler

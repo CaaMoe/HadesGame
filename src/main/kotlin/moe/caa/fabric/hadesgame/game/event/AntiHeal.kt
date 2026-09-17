@@ -27,12 +27,4 @@ data object AntiHeal : AbstractSustainGameEvent() {
         Component.literal("禁止治疗效果已失效").withColor(Color.RED.rgb),
         Sound(SoundEvents.AMETHYST_BLOCK_BREAK, 1F, 0.5F)
     )
-
-    override fun eventStart() {
-
-    }
-
-    override fun eventEnd() {
-
-    }
 }

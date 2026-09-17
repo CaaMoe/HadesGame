@@ -56,12 +56,4 @@ data object SuperMiners : AbstractSustainGameEvent() {
         Component.literal("超级矿工效果已失效").withColor(Color.RED.rgb),
         Sound(SoundEvents.VILLAGER_NO, 1F, 0.7F)
     )
-
-    override fun eventStart() {
-
-    }
-
-    override fun eventEnd() {
-
-    }
 }

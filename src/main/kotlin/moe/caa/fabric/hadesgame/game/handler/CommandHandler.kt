@@ -17,16 +17,16 @@ data object CommandHandler {
                 .then(Commands.literal("start").executes(::executeStart))
                 .then(
                     Commands.literal("call")
-                    .then(
-                        Commands.argument("name", StringArgumentType.string())
-                        .suggests { _, builder ->
-                            SharedSuggestionProvider.suggest(buildList {
-                                GamingStage.allGameEvents.forEach { add(it.javaClass.simpleName.lowercase()) }
-                            }, builder)
-                        }
-                        .requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
-                        .executes(::executeCall)
-                    )
+                        .then(
+                            Commands.argument("name", StringArgumentType.string())
+                                .suggests { _, builder ->
+                                    SharedSuggestionProvider.suggest(buildList {
+                                        GamingStage.allGameEvents.forEach { add(it.javaClass.simpleName.lowercase()) }
+                                    }, builder)
+                                }
+                                .requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
+                                .executes(::executeCall)
+                        )
                 )
         )
     }

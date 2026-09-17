@@ -7,24 +7,24 @@ import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
 import java.awt.Color
 
-data object TickDown : AbstractSustainGameEvent() {
-    override val name = "超级减速"
+data object TickUp : AbstractSustainGameEvent() {
+    override val name = "超级加速"
 
     override val startMessage = Message(
-        Component.literal("超级减速效果已生效").withColor(Color.GREEN.rgb),
-        Component.literal("超级减速效果已生效").withColor(Color.GREEN.rgb),
+        Component.literal("超级加速效果已生效").withColor(Color.GREEN.rgb),
+        Component.literal("超级加速效果已生效").withColor(Color.GREEN.rgb),
         Sound(SoundEvents.BEACON_ACTIVATE, 1F, 1.2F)
     )
 
     override val endMessage = Message(
-        Component.literal("超级减速效果已失效").withColor(Color.RED.rgb),
-        Component.literal("超级减速效果已失效").withColor(Color.RED.rgb),
+        Component.literal("超级加速效果已失效").withColor(Color.RED.rgb),
+        Component.literal("超级加速效果已失效").withColor(Color.RED.rgb),
         Sound(SoundEvents.BEACON_DEACTIVATE, 1F, 0.9F)
     )
 
     override fun eventStart() {
-        TickUp.shouldEnd()
-        GameCore.server.tickRateManager().setTickRate(10F)
+        TickDown.shouldEnd()
+        GameCore.server.tickRateManager().setTickRate(40F)
     }
 
     override fun eventEnd() {
