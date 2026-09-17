@@ -18,7 +18,7 @@ data object GamingStage : AbstractStage() {
 
     var invincible = true
 
-    private val allGameEvents = AbstractGameEvent.fetchAllGameEvents()
+    val allGameEvents = AbstractGameEvent.fetchAllGameEvents()
     private val extractableEvents = allGameEvents.filter { it.extractable }
 
     private var eventCountdownRange = 20..70
