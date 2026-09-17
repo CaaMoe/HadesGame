@@ -10,7 +10,7 @@ import net.minecraft.world.item.ItemStack
 import java.awt.Color
 
 data object SwapInventory : AbstractSwapTypeGameEvent<List<ItemStack>>() {
-    override val name = "交换背包"
+    override val name = "互换背包"
 
     override fun extract(source: ServerPlayer) = buildList(source.inventory.containerSize) {
         for (index in 0 until source.inventory.containerSize) {

@@ -7,7 +7,7 @@ import net.minecraft.sounds.SoundEvents
 import java.awt.Color
 
 data object SwapLocation : AbstractSwapTypeGameEvent<Location>() {
-    override val name = "交换位置"
+    override val name = "互换位置"
 
     override fun extract(source: ServerPlayer) = source.getLocation()
 
