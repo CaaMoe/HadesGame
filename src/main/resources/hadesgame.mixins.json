@@ -11,6 +11,9 @@
   },
   "mixins": [
     "LivingEntityAccessor",
-    "MixinLivingEntity"
+    "MixinDedicatedServer",
+    "MixinLivingEntity",
+    "MixinServerCommandSource",
+    "MixinServerWorld"
   ]
 }
