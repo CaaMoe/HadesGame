@@ -21,7 +21,7 @@ data object GamingStage : AbstractStage() {
     val allGameEvents = AbstractGameEvent.fetchAllGameEvents()
     private val extractableEvents = allGameEvents.filter { it.extractable }
 
-    private var eventCountdownRange = 30..120
+    private var eventCountdownRange = 40..85
     private var tickNumber = 0
 
     private var currentEvents = emptyList<EventCarrier>()

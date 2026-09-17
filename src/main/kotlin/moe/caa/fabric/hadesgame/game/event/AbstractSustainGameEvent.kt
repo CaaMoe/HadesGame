@@ -44,7 +44,7 @@ sealed class AbstractSustainGameEvent : AbstractGameEvent() {
     /**
      * 事件总持续时长.
      */
-    open val keepTickNumber = 30 * 20
+    open val keepTickNumber = 45 * 20
 
     /**
      * 事件开始时广播的消息.
