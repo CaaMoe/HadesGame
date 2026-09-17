@@ -6,10 +6,10 @@ import moe.caa.fabric.hadesgame.game.event.InternalInvincible
 import moe.caa.fabric.hadesgame.game.handler.ScoreboardHandler
 import moe.caa.fabric.hadesgame.util.*
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.Style
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.level.GameType
 import java.awt.Color
-import kotlin.properties.Delegates
 import kotlin.random.Random
 
 data object GamingStage : AbstractStage() {
@@ -23,9 +23,67 @@ data object GamingStage : AbstractStage() {
 
     private var eventCountdownRange = 20..70
     private var tickNumber = 0
-    private var eventCountdown = 0
-    private var nextEvent by Delegates.notNull<AbstractGameEvent>()
-    private var codType by Delegates.notNull<CodType>()
+
+    private var currentEvents = emptyList<EventCarrier>()
+
+    data class EventCarrier(
+        var event: AbstractGameEvent,
+        var eventCountdown: Int,
+        var codType: CodType
+    ) {
+        fun call() {
+            if (Random.nextDouble() < 0.8) {
+                event.call()
+            } else {
+                Component.literal("FAKE EVENT").withColor(Color.RED.rgb).broadcastOverlay()
+                SoundEvents.NOTE_BLOCK_DIDGERIDOO.value().broadcast(1F, 1.5F)
+            }
+        }
+
+        fun buildScoreboardContentEntries(): Component {
+
+            fun Int.countdownFormat(): String {
+                return String.format("%02d:%02d", this / 60, this % 60)
+            }
+
+            var component = Component.literal("   ")
+
+            if (eventCountdown <= 0) {
+                component = component.append(
+                    Component.literal(event.name)
+                        .withColor(Color.GREEN.rgb)
+                        .withStyle(Style.EMPTY.withStrikethrough(true))
+                )
+                component = component.append("  ")
+                component = component.append(Component.literal("00:00").withColor(Color.LIGHT_GRAY.rgb))
+            } else if (eventCountdown > 10) {
+                component = if (codType.hideEventName) {
+                    component.append(Component.literal("§kCaaMoe").withColor(Color.GREEN.rgb))
+                } else {
+                    component.append(Component.literal(event.name).withColor(Color.GREEN.rgb))
+                }
+
+                component = component.append("  ")
+
+                component = if (codType.hideCountdown) {
+                    component.append(Component.literal("§k00:10").withColor(Color.LIGHT_GRAY.rgb))
+                } else {
+                    component.append(
+                        Component.literal(eventCountdown.countdownFormat()).withColor(Color.LIGHT_GRAY.rgb)
+                    )
+                }
+
+            } else {
+                component = component.append(Component.literal(event.name).withColor(Color.GREEN.rgb))
+                component = component.append("  ")
+                component = component.append(
+                    Component.literal(eventCountdown.countdownFormat()).withColor(Color.LIGHT_GRAY.rgb)
+                )
+            }
+
+            return component
+        }
+    }
 
     enum class CodType {
         ALL {
@@ -64,7 +122,7 @@ data object GamingStage : AbstractStage() {
             border.lerpSizeBetween(1000.0, 3.0, 20 * 60 * 10, 0L)
         }
 
-        randomNextEvent()
+        randomEvents()
         InternalInvincible.call()
     }
 
@@ -74,60 +132,54 @@ data object GamingStage : AbstractStage() {
         }
     }
 
-    private fun randomNextEvent() {
-        eventCountdown = eventCountdownRange.random()
-        codType = CodType.entries.toTypedArray().random()
-        nextEvent = extractableEvents.random()
+    private fun randomEvents() {
+        val shuffled = extractableEvents.shuffled().toMutableList()
+
+        currentEvents = buildList {
+            val repeat = 2
+            // todo repeat
+
+            repeat(repeat) {
+                shuffled.removeLastOrNull()?.also { event ->
+                    add(
+                        EventCarrier(
+                            event,
+                            eventCountdownRange.random(),
+                            CodType.entries.random()
+                        )
+                    )
+                }
+            }
+        }
     }
 
     override suspend fun tick() {
         tickNumber++
 
-        if (eventCountdown <= 2) {
-            if (tickNumber % 2 == 0) {
-                SoundEvents.NOTE_BLOCK_BIT.value().broadcast(1F, 2.0F)
-            }
-        }
-
         if (tickNumber % 20 == 0) {
-            eventCountdown--
-            if (eventCountdown <= 0) {
-                if (Random.nextDouble() < 0.7) {
-                    nextEvent.call()
-                } else {
-                    Component.literal("FAKE EVENT").withColor(Color.RED.rgb).broadcastOverlay()
-                    SoundEvents.NOTE_BLOCK_DIDGERIDOO.value().broadcast(1F, 1.5F)
+
+            var playedCountdownSound = false
+            currentEvents.forEach {
+                it.eventCountdown--
+
+                if (it.eventCountdown == 0) {
+                    it.call()
+                } else if (!playedCountdownSound && it.eventCountdown in 1..5) {
+                    SoundEvents.NOTE_BLOCK_HAT.value().broadcast(1F, 1.0F)
+                    playedCountdownSound = true
                 }
-                randomNextEvent()
+            }
+
+            if (!currentEvents.any { it.eventCountdown > 0 }) {
+                randomEvents()
             }
 
             ScoreboardHandler.updateContents(contents = buildList {
                 add(Component.literal(" "))
                 add(Component.literal(" 下一事件:"))
 
-                fun Int.countdownFormat() = String.format("%02d:%02d", this / 60, this % 60)
+                currentEvents.forEach { add(it.buildScoreboardContentEntries()) }
 
-                if (eventCountdown > 10) {
-                    add(
-                        Component.literal("   ")
-                            .append(
-                                Component.literal(if (codType.hideEventName) "§kCaaMoe" else nextEvent.name)
-                                    .withColor(Color.GREEN.rgb)
-                            )
-                            .append(Component.literal("  ").withColor(Color.GREEN.rgb))
-                            .append(
-                                Component.literal(if (codType.hideCountdown) "§k00:10" else eventCountdown.countdownFormat())
-                                    .withColor(Color.LIGHT_GRAY.rgb)
-                            )
-                    )
-                } else {
-                    add(
-                        Component.literal("   ")
-                            .append(Component.literal(nextEvent.name).withColor(Color.GREEN.rgb))
-                            .append(Component.literal("  ").withColor(Color.GREEN.rgb))
-                            .append(Component.literal(eventCountdown.countdownFormat()).withColor(Color.LIGHT_GRAY.rgb))
-                    )
-                }
                 add(Component.literal(" "))
                 add(
                     Component.literal(" 边界: ").append(
