@@ -9,7 +9,7 @@ import java.awt.Color
 
 data object TickUp : AbstractSustainGameEvent() {
     override val name = "超级加速"
-    override val mutualExclusions = listOf(TickDown)
+    override val mutexType = MutexType.TICK_MODIFIER
 
     override val startMessage = Message(
         Component.literal("超级加速效果已生效").withColor(Color.GREEN.rgb),

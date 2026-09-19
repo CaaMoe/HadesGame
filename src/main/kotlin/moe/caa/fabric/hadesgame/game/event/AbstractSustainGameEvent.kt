@@ -5,6 +5,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import moe.caa.fabric.hadesgame.game.GameCore
+import moe.caa.fabric.hadesgame.game.stage.GamingStage
 import moe.caa.fabric.hadesgame.util.EMPTY_MESSAGE
 import moe.caa.fabric.hadesgame.util.broadcast
 import net.minecraft.network.chat.Component
@@ -34,7 +35,7 @@ sealed class AbstractSustainGameEvent : AbstractGameEvent() {
     private val bossBarIdentifier = Identifier.fromNamespaceAndPath("hadesgame", javaClass.simpleName.lowercase())
     private var bossBar: CustomBossEvent? = null
 
-    open val mutualExclusions = emptyList<AbstractSustainGameEvent>()
+    open val mutexType: MutexType? = null
 
     /**
      * BossBar 的颜色.
@@ -124,7 +125,12 @@ sealed class AbstractSustainGameEvent : AbstractGameEvent() {
             }
         }
 
-        mutualExclusions.forEach { it.shouldEnd() }
+        if (mutexType != null) {
+            GamingStage.allGameEvents
+                .filterIsInstance<AbstractSustainGameEvent>()
+                .filter { it.mutexType == mutexType }
+                .forEach { it.shouldEnd() }
+        }
 
         eventStart()
         startMessage.broadcast()
@@ -140,4 +146,8 @@ sealed class AbstractSustainGameEvent : AbstractGameEvent() {
      * 持续型事件失效逻辑
      */
     open fun eventEnd() {}
+
+    enum class MutexType {
+        TICK_MODIFIER,
+    }
 }
