@@ -1,8 +1,11 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.nio.charset.StandardCharsets
 
 plugins {
+    id("org.jetbrains.kotlin.jvm")
+    id("org.jetbrains.gradle.plugin.idea-ext")
     id("net.fabricmc.fabric-loom")
-    id("org.jetbrains.kotlin.jvm") version "2.4.20"
+    id("net.kyori.blossom")
 }
 
 dependencies {
@@ -24,6 +27,29 @@ tasks.processResources {
     }
 }
 
+
+fun getCurrentBranchName(): String {
+    return runCatching {
+        val pb = ProcessBuilder("git", "rev-parse", "--abbrev-ref", "HEAD")
+            .directory(project.rootDir)
+        val process = pb.start()
+        process.waitFor()
+        process.inputStream.readAllBytes().toString(StandardCharsets.UTF_8).trim()
+    }.getOrDefault("")
+}
+
+fun getCommitId(): String {
+    return runCatching {
+        val pb = ProcessBuilder("git", "rev-parse", "HEAD")
+            .directory(project.rootDir)
+        val process = pb.start()
+        process.waitFor()
+        process.inputStream.readAllBytes().toString(StandardCharsets.UTF_8).trim()
+    }.getOrDefault("")
+}
+
+
+
 tasks.withType<JavaCompile>().configureEach {
     options.release = 25
 }
@@ -37,4 +63,15 @@ kotlin {
 java {
     sourceCompatibility = JavaVersion.VERSION_25
     targetCompatibility = JavaVersion.VERSION_25
+}
+
+sourceSets {
+    main {
+        blossom {
+            javaSources {
+                property("branch_name", getCurrentBranchName())
+                property("commit_id", getCommitId())
+            }
+        }
+    }
 }

@@ -1,0 +1,6 @@
+package moe.caa.fabric.hadesgame;
+
+public class BuildInfo {
+    public static final String BRANCH_NAME = "{# @pebvariable name="branch_name" type="str" #}{{ branch_name }}";
+    public static final String COMMIT_ID = "{# @pebvariable name="commit_id" type="str" #}{{ commit_id }}";
+}

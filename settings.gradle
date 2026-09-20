@@ -9,7 +9,10 @@ pluginManagement {
     }
 
     plugins {
+        id("org.jetbrains.kotlin.jvm") version providers.gradleProperty("kotlin_version")
         id("net.fabricmc.fabric-loom") version providers.gradleProperty("loom_version")
+        id("org.jetbrains.gradle.plugin.idea-ext") version providers.gradleProperty("idea-ext_version")
+        id("net.kyori.blossom") version providers.gradleProperty("blossom_version")
     }
 }
 

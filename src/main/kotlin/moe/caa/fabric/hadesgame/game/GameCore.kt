@@ -1,6 +1,11 @@
 package moe.caa.fabric.hadesgame.game
 
 import kotlinx.coroutines.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import moe.caa.fabric.hadesgame.BuildInfo
 import moe.caa.fabric.hadesgame.game.handler.CommandHandler
 import moe.caa.fabric.hadesgame.game.handler.DamageAndDeathHandler
 import moe.caa.fabric.hadesgame.game.handler.JoinLeaveHandler
@@ -13,9 +18,14 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.minecraft.server.MinecraftServer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.net.HttpURLConnection
+import java.net.URI
+import java.nio.charset.StandardCharsets
 import kotlin.math.max
 import kotlin.properties.Delegates
+import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 data object GameCore {
     lateinit var server: MinecraftServer
@@ -36,6 +46,8 @@ data object GameCore {
         this.logger = LoggerFactory.getLogger("HadesGame")
 
         logger.info("正在加载 阴间游戏v4...")
+
+        startCheckUpdater()
 
         ScoreboardHandler.init()
         CommandHandler.init()
@@ -86,5 +98,55 @@ data object GameCore {
         randomLocationChunkTicketType // init chunk ticket
         ServerLifecycleEvents.SERVER_STARTED.register { setup(it) }
         ServerLifecycleEvents.SERVER_STOPPING.register { stop() }
+    }
+
+
+    private fun startCheckUpdater() {
+        coroutineScope.launch {
+            withContext(Dispatchers.IO) {
+                delay(10.seconds)
+
+                while (isActive) {
+                    logger.info("正在检查最新版本...")
+                    val latestCommitId = getLatestCommitId()
+
+                    val url = "https://github.com/CaaMoe/HadesGame/tree/${BuildInfo.BRANCH_NAME}"
+                    if (latestCommitId == "") {
+                        logger.warn("无法获取版本更新, 可前往 $url 手动检查更新.")
+                    } else {
+                        if (latestCommitId == BuildInfo.COMMIT_ID) {
+                            logger.info("当前已是最新版本.")
+                        } else {
+                            logger.warn("当前版本过期了, 请前往 $url 获取最新版本.")
+                        }
+                    }
+
+                    delay(2.hours)
+                }
+            }
+        }
+    }
+
+    private fun getLatestCommitId(): String {
+        return runCatching {
+            val apiUrl = "https://api.github.com/repos/CaaMoe/HadesGame/branches/${BuildInfo.BRANCH_NAME}"
+            val url = URI(apiUrl).toURL()
+            val conn = url.openConnection() as HttpURLConnection
+            conn.requestMethod = "GET"
+            conn.connectTimeout = 10000
+            conn.readTimeout = 10000
+
+            if (conn.responseCode != 200) {
+                return@runCatching ""
+            }
+
+            val jsonStr = conn.inputStream.use {
+                it.readAllBytes().toString(StandardCharsets.UTF_8)
+            }
+            conn.disconnect()
+
+            val element = Json.decodeFromString<JsonObject>(jsonStr)
+            return@runCatching element["commit"]?.jsonObject?.get("sha")?.jsonPrimitive?.content ?: ""
+        }.getOrElse { "" }
     }
 }
