@@ -19,7 +19,7 @@
     "fabricloader": "*",
     "fabric-api": "*",
     "fabric-language-kotlin": "*",
-    "minecraft": "26.3",
-    "java": ">=25"
+    "minecraft": "*",
+    "java": "*"
   }
 }
