@@ -45,6 +45,6 @@ data object ReverseDamage : AbstractSustainGameEvent() {
     override val endMessage = Message(
         Component.literal("伤害反转效果已失效").withColor(Color.RED.rgb),
         Component.literal("伤害反转效果已失效").withColor(Color.RED.rgb),
-        Sound(SoundEvents.CHAIN_BREAK, 1F, 0.5F)
+        Sound(SoundEvents.CHAIN.breakSound.get().value(), 1F, 0.5F)
     )
 }

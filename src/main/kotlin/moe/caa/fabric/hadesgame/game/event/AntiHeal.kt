@@ -25,6 +25,6 @@ data object AntiHeal : AbstractSustainGameEvent() {
     override val endMessage = Message(
         Component.literal("禁止治疗效果已失效").withColor(Color.RED.rgb),
         Component.literal("禁止治疗效果已失效").withColor(Color.RED.rgb),
-        Sound(SoundEvents.AMETHYST_BLOCK_BREAK, 1F, 0.5F)
+        Sound(SoundEvents.AMETHYST_BLOCK.breakSound.get().value(), 1F, 0.5F)
     )
 }
